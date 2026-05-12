@@ -1,0 +1,20 @@
+﻿
+
+using apiUrbanPlanning.Infrastructure.Models;
+
+namespace apiUrbanPlanning.Infrastructure.Repositories
+{
+    public interface InterfaceSuggestion
+    {
+        Task CreateSuggestion(Suggestion Objeto);
+
+        Task<List<Suggestion>> GetAllSuggestions(double latMin, double latMax, double lonMin, double lonMax, string Status);
+        Task<List<Suggestion>> GetAllSuggestionsFeed(int pageNumber, int pageSize, int? ibgeId);
+        Task<List<Suggestion>> GetAllSuggestionsAdm(string Status, int NumberSuggestion, DateTime? DateCalendar, int pageNumber, int pageSize);
+        Task<Suggestion> GetSuggestionByNumber(int number);
+        Task UpdateSuggestion(Suggestion suggestion);
+
+        Task<Suggestion> GetSuggestionById(Guid id);
+
+    }
+}
