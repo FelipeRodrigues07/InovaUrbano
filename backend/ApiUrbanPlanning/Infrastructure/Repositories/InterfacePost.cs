@@ -8,6 +8,6 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
         Task CreatePost(Post Object);
         Task<List<Post>> GetAllPostAdm( int NumberSuggestion, DateTime? DateCalendar, int pageNumber, int pageSize);
 
-        Task<List<Post>> GetAllPostsFeed(int pageNumber, int pageSize);
+        Task<List<Post>> GetAllPostsFeed(int pageNumber, int pageSize, int? ibgeId);
     }
 }

@@ -27,6 +27,7 @@ namespace apiUrbanPlanning.UseCase.Suggestions
                 suggestionResponses.Add(new GetAllSuggestionsFeedResponse
                 {
                     Id = suggestion.Id,
+                    Number = suggestion.Number,
                     Type = suggestion.Type,
                     Description = suggestion.Description,
                     Latitude = suggestion.Latitude,

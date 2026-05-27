@@ -7,6 +7,10 @@ class GetAllPostsFeedModel {
   final DateTime createdAt;
   final String userName;
   final String profilePictureUrl;
+  final int numberSuggestion;
+  final int? suggestionIbgeId;
+  final String suggestionType;
+  final String suggestionStatus;
 
   GetAllPostsFeedModel({
     required this.id,
@@ -17,10 +21,13 @@ class GetAllPostsFeedModel {
     required this.createdAt,
     required this.userName,
     required this.profilePictureUrl,
-
+    required this.numberSuggestion,
+    this.suggestionIbgeId,
+    required this.suggestionType,
+    required this.suggestionStatus,
   });
 
-  factory  GetAllPostsFeedModel.fromJson(Map<String, dynamic> json) {
+  factory GetAllPostsFeedModel.fromJson(Map<String, dynamic> json) {
     return GetAllPostsFeedModel(
       id: json['id'],
       title: json['title'],
@@ -29,7 +36,11 @@ class GetAllPostsFeedModel {
       postImageUrl: json['postImageUrl'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
       userName: json['userName'] ?? '',
-      profilePictureUrl: json['profilePictureUrl'] ?? '', 
+      profilePictureUrl: json['profilePictureUrl'] ?? '',
+      numberSuggestion: (json['numberSuggestion'] as num?)?.toInt() ?? 0,
+      suggestionIbgeId: (json['suggestionIbgeId'] as num?)?.toInt(),
+      suggestionType: json['suggestionType'] ?? '',
+      suggestionStatus: json['suggestionStatus'] ?? '',
     );
   }
 }

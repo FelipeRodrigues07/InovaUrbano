@@ -37,22 +37,18 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
         public async Task<List<Suggestion>> GetAllSuggestionsFeed(int pageNumber, int pageSize, int? ibgeId)
         {
-            // Mantem a paginação original; só altera quando `ibgeId` é fornecido.
             if (!ibgeId.HasValue)
             {
-                return await _context.Suggestions
-                                     //.OrderByDescending(s => s.CreatedAt)
-                                     .Skip((pageNumber - 1) * pageSize)
-                                     .Take(pageSize)
-                                     .ToListAsync();
+                return new List<Suggestion>();
             }
 
-            return await _context.Suggestions
-                                 .Where(s => s.IbgeId == ibgeId.Value)
-                                 //.OrderByDescending(s => s.CreatedAt)
-                                 .Skip((pageNumber - 1) * pageSize)
-                                 .Take(pageSize)
-                                 .ToListAsync();
+            var query = _context.Suggestions.Where(s => s.IbgeId == ibgeId.Value);
+
+            return await query
+                .OrderByDescending(s => s.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
 

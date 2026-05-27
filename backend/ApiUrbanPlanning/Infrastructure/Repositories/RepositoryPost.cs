@@ -49,13 +49,22 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
         }
 
 
-        public async Task<List<Post>> GetAllPostsFeed(int pageNumber, int pageSize)
+        public async Task<List<Post>> GetAllPostsFeed(int pageNumber, int pageSize, int? ibgeId)
         {
-            return await _context.Posts
-                                 //.OrderByDescending(s => s.CreatedAt)
-                                 .Skip((pageNumber - 1) * pageSize)
-                                 .Take(pageSize)
-                                 .ToListAsync();
+            if (!ibgeId.HasValue)
+            {
+                return new List<Post>();
+            }
+
+            var query = _context.Posts.Where(p =>
+                _context.Suggestions.Any(s =>
+                    s.Id == p.SuggestionId && s.IbgeId == ibgeId.Value));
+
+            return await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
     }

@@ -3,6 +3,7 @@
     public class GetAllSuggestionsFeedResponse
     {
         public Guid Id { get; set; }
+        public int Number { get; set; }
         public string Type { get; set; }
         public string Description { get; set; }
         public double Latitude { get; set; }

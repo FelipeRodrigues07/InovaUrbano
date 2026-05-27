@@ -20,10 +20,13 @@ namespace ApiUrbanPlanning.Controllers.Post
         [HttpGet("posts/feed")]
         [ProducesResponseType(typeof(List<GetAllPostsFeedResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllPostsFeeed([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetAllPostsFeeed(
+            [FromQuery] int pageNumber,
+            [FromQuery] int pageSize,
+            [FromQuery] int? ibgeId)
         {
-            var suggestions = await _getAllPostsFeedUseCase.Execute(pageNumber, pageSize);
-            return Ok(suggestions);
+            var posts = await _getAllPostsFeedUseCase.Execute(pageNumber, pageSize, ibgeId);
+            return Ok(posts);
         }
     }
 }

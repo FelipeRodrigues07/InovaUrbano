@@ -16,11 +16,20 @@ class ConfigPage extends StatefulWidget {
 class _HomePageState extends State<ConfigPage> {
   int paginaAtual = 0;
   late PageController pc;
+  final GlobalKey<FeedState> _feedKey = GlobalKey<FeedState>();
 
   @override
   void initState() {
     super.initState();
     pc = PageController(initialPage: paginaAtual);
+  }
+
+  void _refreshFeedIfNeeded(int pagina) {
+    if (pagina != 2) return;
+    // Evita corrida com o initState do Feed (duas requisições ao mesmo tempo).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _feedKey.currentState?.reloadFromPrefs();
+    });
   }
 
   setPaginaAtual(pagina) {
@@ -38,19 +47,21 @@ class _HomePageState extends State<ConfigPage> {
       body: PageView(
         controller: pc,
         onPageChanged: (pagina) {
-          setPaginaAtual(pagina); // Atualiza a página atual
-          // Verifica se a página atual é a de perfil
+          setPaginaAtual(pagina);
+          if (pagina == 2) {
+            _refreshFeedIfNeeded(pagina);
+          }
           if (pagina == 3 && authProvider.token == null) {
             // Usuário não autenticado, navega para a tela de autenticação
             print('Usuário não autenticado. Redirecionando para a tela de login. : ${authProvider.token}');
             Navigator.of(context).pushReplacementNamed('/login');
           }
         },
-        children: const [
-          Home(),
-          ReportScreen(),
-          Feed(),
-          ProfilePage(),
+        children: [
+          const Home(),
+          const ReportScreen(),
+          Feed(key: _feedKey),
+          const ProfilePage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -80,12 +91,14 @@ class _HomePageState extends State<ConfigPage> {
               );
             }
           } else {
-            // Para outras abas, navegue normalmente
             pc.animateToPage(
               pagina,
               duration: Duration(milliseconds: 400),
               curve: Curves.ease,
             );
+            if (pagina == 2) {
+              _refreshFeedIfNeeded(pagina);
+            }
           }
         },
 
