@@ -1,8 +1,10 @@
-import 'dart:convert'; // Importa o pacote json
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Importa o pacote http
+import 'package:http/http.dart' as http;
 import 'package:planejamento_urbano/config/api_constants.dart';
 import 'package:planejamento_urbano/models/user_profile.dart';
+import 'package:planejamento_urbano/services/auth/auth_session.dart';
 import 'package:planejamento_urbano/storage/storage_token.dart';
 import 'package:planejamento_urbano/storage/storage_user.dart';
 
@@ -15,53 +17,42 @@ class AuthProvider with ChangeNotifier {
   UserProfile? get userProfile => _userProfile;
   bool get isLoadingUserStorageData => _isLoadingUserStorageData;
 
-  Future<void> signIn(String email, String password) async {
-    try {
-      final url =
-          Uri.parse('$baseUrl/authenticate'); // Endpoint da API
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password
-        }), // Envia as credenciais como JSON
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        if (responseData['token'] != null) {
-          String token = responseData['token'];
-          print('Token recebido: $token');
-          await StorageToken.storageAuthTokenSave(token);
-          _token = token;
-          await fetchProfile();
-          notifyListeners();
-        }
-      } else {
-        throw Exception('Falha na autenticação: ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      throw error; // Trate o erro depois
+  /// Access token válido (renova com refresh se necessário).
+  Future<String?> ensureAccessToken() async {
+    final access = await AuthSession.getValidAccessToken();
+    if (access != _token) {
+      _token = access;
+      notifyListeners();
     }
+    return access;
+  }
+
+  Future<void> signIn(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/authenticate'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Falha na autenticação: ${response.reasonPhrase}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    await AuthSession.persistLoginResponse(data);
+    _token = data['token'] as String;
+    await fetchProfile();
+    notifyListeners();
   }
 
   Future<void> loadUserData() async {
     try {
       _isLoadingUserStorageData = true;
-      final token = await StorageToken
-          .storageAuthTokenGet(); // Recupera o token do armazenamento
+      _token = await StorageToken.storageAuthTokenGet();
       final userData = await StorageUser.storageUserDataGet();
-      if (token != null) {
-        _token = token; // Armazena o token na variável
-      }
       if (userData != null) {
         _userProfile = UserProfile.fromJson(userData);
       }
-      print("Token após carregar: $_token");
-      print("Perfil carregado: $_userProfile");
-    } catch (error) {
-      throw error; 
     } finally {
       _isLoadingUserStorageData = false;
       notifyListeners();
@@ -71,60 +62,47 @@ class AuthProvider with ChangeNotifier {
   Future<void> signOut() async {
     try {
       _isLoadingUserStorageData = true;
-      _token = null; 
-      _userProfile = null; 
-      print("Token após limpeza: $_token");
-      await StorageToken.storageAuthTokenRemove();
+      await AuthSession.logoutRemote();
+      _token = null;
+      _userProfile = null;
       await StorageUser.storageUserDataRemove();
       notifyListeners();
-    } catch (error) {
-      throw error;
     } finally {
       _isLoadingUserStorageData = false;
+      notifyListeners();
     }
   }
 
   Future<void> initialize() async {
-    print("Iniciando a inicialização do usuário...");
     await loadUserData();
-    print("Token carregado: $_token");
-
-    // if (_token != null) {
-    //   print("Buscando o perfil do usuário...");
-    //   await fetchProfile();
-    //   print("Perfil carregado com sucesso!");
-    // } else {
-    //   print("Token é nulo, não foi possível buscar o perfil.");
-    // }
   }
 
   Future<Map<String, dynamic>> fetchProfile() async {
-    if (_token == null) {
+    final access = await ensureAccessToken();
+    if (access == null) {
       throw Exception('Usuário não autenticado');
     }
 
-    try {
-      final url = Uri.parse('$baseUrl/profile');
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_token', 
-          'Content-Type': 'application/json',
-        },
-      );
+    final response = await http.get(
+      Uri.parse('$baseUrl/profile'),
+      headers: {
+        'Authorization': 'Bearer $access',
+        'Content-Type': 'application/json',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final profileData = jsonDecode(response.body);
-        print('Dados do perfil recebidos: $profileData');
-        _userProfile = UserProfile.fromJson(profileData);
-        await StorageUser.storageUserDataSave(profileData);
-        notifyListeners();
-        return profileData;
-      } else {
-        throw Exception('Erro ao buscar o perfil: ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      throw error;
+    if (response.statusCode == 200) {
+      final profileData = jsonDecode(response.body) as Map<String, dynamic>;
+      _userProfile = UserProfile.fromJson(profileData);
+      await StorageUser.storageUserDataSave(profileData);
+      notifyListeners();
+      return profileData;
     }
+
+    if (response.statusCode == 401) {
+      await signOut();
+    }
+
+    throw Exception('Erro ao buscar o perfil: ${response.reasonPhrase}');
   }
 }

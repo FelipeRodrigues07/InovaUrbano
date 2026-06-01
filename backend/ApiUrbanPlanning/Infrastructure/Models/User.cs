@@ -11,6 +11,8 @@
         public string Role { get; set; } = "member";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
 
         // Relação um-para-muitos: Um usuário pode ter muitas sugestões
         public ICollection<Suggestion> Suggestions { get; set; } = new List<Suggestion>();

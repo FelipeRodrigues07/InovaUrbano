@@ -1,6 +1,7 @@
 using ApiUrbanPlanning.Response;
 using ApiUrbanPlanning.UseCase.Post;
 using ApiUrbanPlanning.UseCase.Suggestions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUrbanPlanning.Controllers.Post
@@ -18,6 +19,7 @@ namespace ApiUrbanPlanning.Controllers.Post
         }
 
         [HttpGet("posts/adm")]
+        [Authorize]
         [ProducesResponseType(typeof(List<GetAllPostAdmResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(

@@ -239,7 +239,7 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _submitSuggestion() async {
-    final token = authProvider.token;
+    final token = await authProvider.ensureAccessToken();
     if (token == null) {
       _showLoginModal();
       return;

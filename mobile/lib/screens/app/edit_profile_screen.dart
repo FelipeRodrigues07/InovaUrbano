@@ -47,7 +47,7 @@ class _EditProfileState extends State<EditProfile> {
               onPressed: () async {
                 final authProvider =
                     Provider.of<AuthProvider>(context, listen: false);
-                final token = authProvider.token;
+                final token = await authProvider.ensureAccessToken();
 
                 if (fieldName == 'Nome' && token != null) {
                   final updateNameController = UpdateNameController();
@@ -129,7 +129,7 @@ class _EditProfileState extends State<EditProfile> {
               onPressed: () async {
                 final authProvider =
                     Provider.of<AuthProvider>(context, listen: false);
-                final token = authProvider.token;
+                final token = await authProvider.ensureAccessToken();
 
                 final updatePasswordController = UpdatePasswordController();
 

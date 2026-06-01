@@ -1,85 +1,132 @@
 ﻿using apiUrbanPlanning.Infrastructure.Models;
 using apiUrbanPlanning.Infrastructure.Repositories;
+using apiUrbanPlanning.Infrastructure.Services;
 using apiUrbanPlanning.Requests;
 using apiUrbanPlanning.Response;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens; //contém classes relacionadas à criação e manipulação de tokens de segurança, como o JWT.
-using System.IdentityModel.Tokens.Jwt; //Este namespace contém classes específicas para criação, validação e manipulação de tokens JWT.
-using System.Security.Claims;
-using System.Text; // convertrer de strings para bytes
 
 namespace apiUrbanPlanning.UseCase.Users
 {
     public class AuthenticateUseCase
     {
-
-        private readonly InterfaceUser _repository;
+        private readonly InterfaceUser _userRepository;
+        private readonly JwtTokenService _jwtTokenService;
         private readonly PasswordHasher<User> _passwordHasher;
-        private readonly string _jwtSecret;
 
-        public AuthenticateUseCase(InterfaceUser repository, IConfiguration configuration)
+        public AuthenticateUseCase(
+            InterfaceUser userRepository,
+            JwtTokenService jwtTokenService)
         {
-            _repository = repository;
+            _userRepository = userRepository;
+            _jwtTokenService = jwtTokenService;
             _passwordHasher = new PasswordHasher<User>();
-            _jwtSecret = configuration["JwtSettings:Secret"];
         }
 
         public async Task<AuthenticateUserResponse> Execute(RequestAuthenticate request)
         {
-            var existingUser = await _repository.GetUserByEmail(request.Email);
+            var user = await _userRepository.GetUserByEmail(request.Email);
 
-            if (existingUser == null)
+            if (user == null)
             {
                 throw new InvalidOperationException("Email does not exist.");
             }
 
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(
-                existingUser,
-                existingUser.Password, // Hash da senha armazenada
-                request.Password // Senha fornecida
-            );
+            var passwordOk = _passwordHasher.VerifyHashedPassword(
+                user, user.Password, request.Password);
 
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            if (passwordOk == PasswordVerificationResult.Failed)
             {
                 throw new UnauthorizedAccessException("User credentials do not match.");
             }
 
-            var token = GenerateJwtToken(existingUser);
+            return await IssueTokensAsync(user);
+        }
+
+        public async Task<AuthenticateUserResponse> Refresh(string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new UnauthorizedAccessException("Refresh token is required.");
+            }
+
+            var userId = _jwtTokenService.ValidateRefreshToken(refreshToken);
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+            }
+
+            var user = await _userRepository.GetUserById(userId.Value);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User not found.");
+            }
+
+            if (string.IsNullOrEmpty(user.RefreshToken) || user.RefreshTokenExpiresAt == null)
+            {
+                throw new UnauthorizedAccessException("Session ended. Please sign in again.");
+            }
+
+            if (user.RefreshTokenExpiresAt <= DateTime.UtcNow)
+            {
+                throw new UnauthorizedAccessException("Refresh token expired.");
+            }
+
+            var hash = JwtTokenService.HashToken(refreshToken);
+            if (!string.Equals(user.RefreshToken, hash, StringComparison.Ordinal))
+            {
+                throw new UnauthorizedAccessException("Refresh token is no longer valid.");
+            }
+
+            return await IssueTokensAsync(user);
+        }
+
+        public async Task Revoke(string? refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return;
+            }
+
+            var userId = _jwtTokenService.ValidateRefreshToken(refreshToken);
+            if (userId == null)
+            {
+                return;
+            }
+
+            var user = await _userRepository.GetUserById(userId.Value);
+            if (user == null)
+            {
+                return;
+            }
+
+            var hash = JwtTokenService.HashToken(refreshToken);
+            if (!string.Equals(user.RefreshToken, hash, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiresAt = null;
+            await _userRepository.UpdateUser(user);
+        }
+
+        private async Task<AuthenticateUserResponse> IssueTokensAsync(User user)
+        {
+            var refreshPlain = _jwtTokenService.GenerateRefreshToken(user);
+
+            user.RefreshToken = JwtTokenService.HashToken(refreshPlain);
+            user.RefreshTokenExpiresAt = _jwtTokenService.RefreshTokenExpiresAt;
+            await _userRepository.UpdateUser(user);
 
             return new AuthenticateUserResponse
             {
-                Id = existingUser.Id,
-                Name = existingUser.Name,
-                Email = existingUser.Email,
-                Token = token
-
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Token = _jwtTokenService.GenerateAccessToken(user),
+                RefreshToken = refreshPlain,
+                ExpiresIn = _jwtTokenService.AccessTokenLifetimeSeconds,
             };
         }
-
-        private string GenerateJwtToken(User user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSecret);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("id", user.Id.ToString()),
-                    new Claim("email", user.Email),
-                    new Claim("role", user.Role)
-                }),
-                Expires = DateTime.UtcNow.AddDays(7), // O token expira em 7 dias
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-
-
-
     }
 }
-

@@ -1,6 +1,7 @@
 using apiUrbanPlanning.Response;
 using ApiUrbanPlanning.Response;
 using ApiUrbanPlanning.UseCase.Suggestions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUrbanPlanning.Controllers.Suggestions
@@ -18,6 +19,7 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
         }
 
         [HttpGet("suggestions/adm")]
+        [Authorize]
         [ProducesResponseType(typeof(List<GetAllSuggestionsAdmResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(

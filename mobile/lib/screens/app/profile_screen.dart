@@ -39,20 +39,20 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> uploadProfilePicture(File image) async {
      final authProvider = Provider.of<AuthProvider>(context, listen: false);
     try {
+      final token = await authProvider.ensureAccessToken();
+      if (token == null) return;
+
       String url = '$baseUrl/upload';
       var request = http.MultipartRequest('POST', Uri.parse(url));
 
-      // Adiciona o arquivo da imagem
       request.files.add(await http.MultipartFile.fromPath(
         'File',
         image.path,
-        filename: basename(image.path), // Nome do arquivo
+        filename: basename(image.path),
       ));
 
-      // Adiciona token de autenticação ou outros headers se necessário
       request.headers.addAll({
-        'Authorization':
-            'Bearer ${authProvider.token}', // Se houver um token de autenticação
+        'Authorization': 'Bearer $token',
       });
 
       // Envia a requisição
@@ -73,11 +73,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> deleteProfilePicture() async {
      final authProvider = Provider.of<AuthProvider>(context, listen: false);
     try {
+      final token = await authProvider.ensureAccessToken();
+      if (token == null) return;
+
       String url = '$baseUrl/delete';
       var response = await http.delete(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer ${authProvider.token}',
+          'Authorization': 'Bearer $token',
         },
       );
 

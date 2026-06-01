@@ -28,6 +28,7 @@ builder.Services.AddScoped<CreateAccountUseCase>();
 builder.Services.AddScoped<InterfaceSuggestion, RepositorySuggestion>();
 builder.Services.AddScoped<InterfacePost, RepositoryPost>();
 builder.Services.AddScoped<CreateSuggestionUseCase>();
+builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthenticateUseCase>();
 builder.Services.AddScoped<ProfileUseCase>();
 builder.Services.AddScoped<GetAllSuggestionsByAreaUseCase>();
@@ -46,7 +47,7 @@ builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(
 builder.Services.AddScoped<CloudinaryService>();
 
 
-// Configura o JWT Bearer para autenticação
+// Configura o JWT Bearer para autentica˜˜o
 var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]);
 
 builder.Services.AddAuthentication(options =>
@@ -58,8 +59,8 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false, // Configure se necessário
-        ValidateAudience = false, // Configure se necessário
+        ValidateIssuer = false, // Configure se necess˜rio
+        ValidateAudience = false, // Configure se necess˜rio
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key)
@@ -77,8 +78,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()       // Permite qualquer origem
-              .AllowAnyMethod()       // Permite qualquer método (GET, POST, etc.)
-              .AllowAnyHeader();      // Permite qualquer cabeçalho
+              .AllowAnyMethod()       // Permite qualquer m˜todo (GET, POST, etc.)
+              .AllowAnyHeader();      // Permite qualquer cabe˜alho
     });
 });
 
@@ -109,6 +110,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAll"); //cors
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
