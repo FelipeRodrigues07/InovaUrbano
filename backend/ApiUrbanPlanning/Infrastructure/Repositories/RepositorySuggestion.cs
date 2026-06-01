@@ -53,7 +53,7 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
 
 
-        public async Task<List<Suggestion>> GetAllSuggestionsAdm(string status, int suggestionNumber, DateTime? DateCalendar, int pageNumber, int pageSize)
+        public async Task<List<Suggestion>> GetAllSuggestionsAdm(string status, int suggestionNumber, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
         {
             var query = _context.Suggestions.AsQueryable();
 
@@ -70,6 +70,11 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
             if (DateCalendar.HasValue)
             {
                 query = query.Where(s => s.CreatedAt.Date == DateCalendar.Value.Date);
+            }
+
+            if (ibgeId.HasValue && ibgeId.Value > 0)
+            {
+                query = query.Where(s => s.IbgeId == ibgeId.Value);
             }
 
             query = query.OrderByDescending(s => s.CreatedAt);

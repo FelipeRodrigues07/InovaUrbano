@@ -15,14 +15,14 @@ namespace ApiUrbanPlanning.UseCase.Suggestions
             _userRepository = userRepository;
         }
 
-        public async Task<List<GetAllSuggestionsAdmResponse>> Execute(string Status, int NumberSuggestion, string DateCalendar, int pageNumber, int pageSize)
+        public async Task<List<GetAllSuggestionsAdmResponse>> Execute(string Status, int NumberSuggestion, string DateCalendar, int? ibgeId, int pageNumber, int pageSize)
         {
 
             DateTime? selectedDate = string.IsNullOrEmpty(DateCalendar)
                           ? (DateTime?)null
                           : DateTime.SpecifyKind(DateTime.Parse(DateCalendar), DateTimeKind.Utc);
 
-            var suggestions = await _repository.GetAllSuggestionsAdm(Status, NumberSuggestion, selectedDate, pageNumber, pageSize);
+            var suggestions = await _repository.GetAllSuggestionsAdm(Status, NumberSuggestion, selectedDate, ibgeId, pageNumber, pageSize);
             var suggestionsResponse = new List<GetAllSuggestionsAdmResponse>();
 
 

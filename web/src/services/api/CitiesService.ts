@@ -66,10 +66,13 @@ export const CitiesService = {
   },
 };
 
+/** Goiás — padrão do app */
+export const DEFAULT_UF_ID = 52;
+
 /** Padrão: Mineiros (GO, IBGE 5213103); senão primeiro da lista ordenada. */
 export function defaultCityIdForUf(ufId: number, cities: CityDto[]): string {
   if (!cities.length) return '';
-  if (ufId === 52) {
+  if (ufId === DEFAULT_UF_ID) {
     const mineiros = cities.find((c) => c.id === '5213103');
     if (mineiros) return mineiros.id;
   }

@@ -10,7 +10,7 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
         Task<List<Suggestion>> GetAllSuggestions(double latMin, double latMax, double lonMin, double lonMax, string Status);
         Task<List<Suggestion>> GetAllSuggestionsFeed(int pageNumber, int pageSize, int? ibgeId);
-        Task<List<Suggestion>> GetAllSuggestionsAdm(string Status, int NumberSuggestion, DateTime? DateCalendar, int pageNumber, int pageSize);
+        Task<List<Suggestion>> GetAllSuggestionsAdm(string Status, int NumberSuggestion, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize);
         Task<Suggestion> GetSuggestionByNumber(int number);
         Task UpdateSuggestion(Suggestion suggestion);
 

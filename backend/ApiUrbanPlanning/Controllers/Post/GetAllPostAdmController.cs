@@ -24,13 +24,17 @@ namespace ApiUrbanPlanning.Controllers.Post
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(
             [FromQuery] int? NumberSuggestion,
+            [FromQuery] string? Status,
             [FromQuery] string? DateCalendar,
+            [FromQuery] int? IbgeId,
             [FromQuery] int pageNumber,
             [FromQuery] int pageSize)
         {
             var posts = await _getAllPostAdmUseCase.Execute(
                 NumberSuggestion ?? 0,
+                Status ?? string.Empty,
                 DateCalendar ?? string.Empty,
+                IbgeId,
                 pageNumber,
                 pageSize);
             return Ok(posts);

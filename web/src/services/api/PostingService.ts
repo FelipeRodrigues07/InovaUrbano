@@ -4,6 +4,7 @@ export interface GetPostingParams {
     numberSuggestion?: number;
     status?: string;
     dateCalendar?: string;
+    ibgeId?: number;
     pageNumber?: number;
     pageSize?: number;
 }
@@ -27,19 +28,24 @@ export const PostingService = {
         numberSuggestion = 0,
         status = '',
         dateCalendar = '',
+        ibgeId,
         pageNumber = 1,
         pageSize = 10,
     }: GetPostingParams): Promise<PostingAdmModel[]> => {
         try {
-            const response = await api.get('/posts/adm', {
-                params: {
-                    NumberSuggestion: numberSuggestion,
-                    Status: status,
-                    DateCalendar: dateCalendar,
-                    pageNumber,
-                    pageSize,
-                },
-            });
+            const params: Record<string, string | number> = {
+                NumberSuggestion: numberSuggestion,
+                Status: status,
+                DateCalendar: dateCalendar,
+                pageNumber,
+                pageSize,
+            };
+
+            if (ibgeId != null && ibgeId > 0) {
+                params.IbgeId = ibgeId;
+            }
+
+            const response = await api.get('/posts/adm', { params });
             return response.data;
         } catch (error) {
             console.error('Falha na requisição:', error);

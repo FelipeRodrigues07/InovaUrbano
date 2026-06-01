@@ -4,10 +4,17 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 import { SuggestionsService } from '@/services/api/SuggestionsService';
-import { CitiesService, defaultCityIdForUf } from '@/services/api/CitiesService';
-import type { UfDto } from '@/services/api/CitiesService';
+import { DEFAULT_UF_ID } from '@/services/api/CitiesService';
+import { useCity } from '@/contexts/CityContext';
 
 import type { GetAllSuggestionsAreaModel } from '@/services/api/SuggestionsService';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 // Corrige ícone padrão do Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -18,7 +25,6 @@ L.Icon.Default.mergeOptions({
 });
 
 /** Goiás — alinhado ao uso anterior do dashboard */
-const DEFAULT_UF_ID = 52;
 
 const statusList = [
     'Todas',
@@ -39,13 +45,19 @@ function ChangeView({ lat, lng }: { lat: number; lng: number }) {
 }
 
 export default function SuggestionsMapPage() {
-    const [ufs, setUfs] = useState<UfDto[]>([]);
-    const [ufsLoading, setUfsLoading] = useState(true);
-    const [ufId, setUfId] = useState(DEFAULT_UF_ID);
+    const {
+        ufs,
+        ufsLoading,
+        ufId,
+        setUfId,
+        citiesList,
+        citiesLoading,
+        cityId,
+        setCityId,
+        selectedCity,
+        selectedUf,
+    } = useCity();
 
-    const [citiesList, setCitiesList] = useState<{ id: string; name: string; lat: number; lng: number }[]>([]);
-    const [citiesLoading, setCitiesLoading] = useState(true);
-    const [cityId, setCityId] = useState('');
     const [status, setStatus] = useState('Todas');
     const [suggestions, setSuggestions] = useState<GetAllSuggestionsAreaModel[]>([]);
     const [loading, setLoading] = useState(false);
@@ -54,55 +66,9 @@ export default function SuggestionsMapPage() {
 
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const u = await CitiesService.getBrazilUfs();
-                if (!cancelled) setUfs(u);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                if (!cancelled) setUfsLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            setCitiesLoading(true);
-            try {
-                const rows = await CitiesService.getCitiesByUf(ufId);
-                if (cancelled) return;
-                const mapped = rows.map((c) => ({
-                    id: c.id,
-                    name: c.name,
-                    lat: c.latitude,
-                    lng: c.longitude,
-                }));
-                setCitiesList(mapped);
-                setCityId(defaultCityIdForUf(ufId, rows));
-            } catch (e) {
-                console.error(e);
-                if (!cancelled) {
-                    setCitiesList([]);
-                    setCityId('');
-                }
-            } finally {
-                if (!cancelled) setCitiesLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [ufId]);
-
-    const selectedCity = citiesList.find((c) => c.id === cityId);
-    const mapCenter = selectedCity ?? { lat: -15.78, lng: -47.93 };
+    const mapCenter = selectedCity
+        ? { lat: selectedCity.latitude, lng: selectedCity.longitude }
+        : { lat: -15.78, lng: -47.93 };
 
     const fetchSuggestions = async (
         center: { lat: number; lng: number },
@@ -152,7 +118,7 @@ export default function SuggestionsMapPage() {
             const zoom = mapRef.current.getZoom();
             fetchSuggestions(center, zoom);
         } else {
-            fetchSuggestions({ lat: selectedCity.lat, lng: selectedCity.lng }, 14);
+            fetchSuggestions({ lat: selectedCity.latitude, lng: selectedCity.longitude }, 14);
         }
     }, [cityId, status, selectedCity]);
 
@@ -188,37 +154,77 @@ export default function SuggestionsMapPage() {
     return (
         <div className="p-4 space-y-4 font-sans">
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-                <select
-                    className="border p-2 rounded bg-white shadow-sm min-w-[12rem]"
-                    value={ufId}
+                <Select
+                    value={String(ufId)}
+                    onValueChange={(v) => setUfId(Number(v))}
                     disabled={ufsLoading && ufs.length === 0}
-                    onChange={(e) => setUfId(Number(e.target.value))}
-                    aria-label="Estado"
                 >
-                    {ufsLoading && ufs.length === 0 ? (
-                        <option value={DEFAULT_UF_ID}>Carregando estados…</option>
-                    ) : ufs.length === 0 ? (
-                        <option value={DEFAULT_UF_ID}>GO — Goiás</option>
-                    ) : (
-                        ufs.map((u) => (
-                            <option key={u.id} value={u.id}>
-                                {u.sigla} — {u.nome}
-                            </option>
-                        ))
-                    )}
-                </select>
+                    <SelectTrigger
+                        size="sm"
+                        className="w-[5.5rem] bg-white shadow-sm"
+                        aria-label="Estado"
+                    >
+                        <SelectValue placeholder="UF">
+                            {ufsLoading && ufs.length === 0
+                                ? '…'
+                                : (selectedUf?.sigla ?? 'GO')}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent
+                        position="popper"
+                        sideOffset={4}
+                        className="z-[1100] max-h-52 w-[11rem] bg-white p-0"
+                    >
+                        {(ufs.length === 0
+                            ? [{ id: DEFAULT_UF_ID, sigla: 'GO', nome: 'Goiás' }]
+                            : ufs
+                        ).map((u) => (
+                            <SelectItem
+                                key={u.id}
+                                value={String(u.id)}
+                                className="py-1.5 pl-2 pr-7 text-sm"
+                            >
+                                <span className="font-medium tabular-nums">{u.sigla}</span>
+                                <span className="text-muted-foreground ml-1.5 truncate">
+                                    {u.nome}
+                                </span>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                <select
-                    className="border p-2 rounded bg-white shadow-sm min-w-[14rem] max-w-[min(100%,22rem)]"
-                    value={cityId}
+                <Select
+                    value={cityId || undefined}
+                    onValueChange={setCityId}
                     disabled={citiesLoading || citiesList.length === 0}
-                    onChange={(e) => setCityId(e.target.value)}
-                    aria-label="Município"
                 >
-                    {citiesList.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                </select>
+                    <SelectTrigger
+                        size="sm"
+                        className="w-[10.5rem] max-w-[min(100%,10.5rem)] bg-white shadow-sm"
+                        aria-label="Município"
+                    >
+                        <SelectValue placeholder="Município">
+                            {citiesLoading
+                                ? 'Carregando…'
+                                : (selectedCity?.name ?? 'Município')}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent
+                        position="popper"
+                        sideOffset={4}
+                        className="z-[1100] max-h-52 w-[var(--radix-select-trigger-width)] min-w-[10.5rem] bg-white p-0"
+                    >
+                        {citiesList.map((c) => (
+                            <SelectItem
+                                key={c.id}
+                                value={c.id}
+                                className="py-1.5 pl-2 pr-7 text-sm"
+                            >
+                                {c.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
                 <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
                     {statusList.map((s) => (

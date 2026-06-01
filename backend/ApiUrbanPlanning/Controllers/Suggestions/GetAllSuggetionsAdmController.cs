@@ -26,6 +26,7 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
             [FromQuery] int? NumberSuggestion,
             [FromQuery] string? Status,
             [FromQuery] string? DateCalendar,
+            [FromQuery] int? IbgeId,
             [FromQuery] int pageNumber,
             [FromQuery] int pageSize)
         {
@@ -33,6 +34,7 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
                 Status ?? string.Empty,
                 NumberSuggestion ?? 0,
                 DateCalendar ?? string.Empty,
+                IbgeId,
                 pageNumber,
                 pageSize);
             return Ok(suggestions);

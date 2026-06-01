@@ -22,26 +22,35 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Post>> GetAllPostAdm( int postNumber, DateTime? DateCalendar, int pageNumber, int pageSize)
+        public async Task<List<Post>> GetAllPostAdm(int numberSuggestion, string status, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
         {
             var query = _context.Posts.AsQueryable();
 
-            //if (!string.IsNullOrEmpty(status) && status != "Todas")
-            //{
-            //    query = query.Where(s => s.Status == status);
-            //}
-
-            if (postNumber > 0)
+            if (numberSuggestion > 0)
             {
-                query = query.Where(s => s.Number == postNumber);
+                query = query.Where(p => p.NumberSuggestion == numberSuggestion);
             }
 
             if (DateCalendar.HasValue)
             {
-                query = query.Where(s => s.CreatedAt.Date == DateCalendar.Value.Date);
+                query = query.Where(p => p.CreatedAt.Date == DateCalendar.Value.Date);
             }
 
-            query = query.OrderByDescending(s => s.CreatedAt);
+            if (!string.IsNullOrEmpty(status) && status != "Todas")
+            {
+                query = query.Where(p =>
+                    _context.Suggestions.Any(s =>
+                        s.Id == p.SuggestionId && s.Status == status));
+            }
+
+            if (ibgeId.HasValue && ibgeId.Value > 0)
+            {
+                query = query.Where(p =>
+                    _context.Suggestions.Any(s =>
+                        s.Id == p.SuggestionId && s.IbgeId == ibgeId.Value));
+            }
+
+            query = query.OrderByDescending(p => p.CreatedAt);
 
             query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
