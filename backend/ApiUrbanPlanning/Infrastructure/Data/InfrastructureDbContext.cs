@@ -32,9 +32,10 @@ namespace apiUrbanPlanning.Infrastructure.Data
 
 
             modelBuilder.Entity<Post>()
-           .Property(s => s.Number)
-           .ValueGeneratedOnAdd()
-           .UseIdentityColumn();
+                .ToTable("Posts")
+                .Property(s => s.Number)
+                .ValueGeneratedOnAdd()
+                .UseIdentityColumn();
 
         }
 

@@ -60,7 +60,7 @@ namespace apiUrbanPlanning.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Post");
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.Suggestion", b =>
