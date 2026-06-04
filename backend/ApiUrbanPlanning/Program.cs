@@ -47,7 +47,7 @@ builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(
 builder.Services.AddScoped<CloudinaryService>();
 
 
-// Configura o JWT Bearer para autentica˜˜o
+// Configura o JWT Bearer para autenticaï¿½ï¿½o
 var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]);
 
 builder.Services.AddAuthentication(options =>
@@ -59,8 +59,8 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false, // Configure se necess˜rio
-        ValidateAudience = false, // Configure se necess˜rio
+        ValidateIssuer = false, // Configure se necessï¿½rio
+        ValidateAudience = false, // Configure se necessï¿½rio
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key)
@@ -78,8 +78,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()       // Permite qualquer origem
-              .AllowAnyMethod()       // Permite qualquer m˜todo (GET, POST, etc.)
-              .AllowAnyHeader();      // Permite qualquer cabe˜alho
+              .AllowAnyMethod()       // Permite qualquer mï¿½todo (GET, POST, etc.)
+              .AllowAnyHeader();      // Permite qualquer cabeï¿½alho
     });
 });
 
