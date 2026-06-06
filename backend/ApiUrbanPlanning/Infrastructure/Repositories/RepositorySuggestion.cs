@@ -53,7 +53,7 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
 
 
-        public async Task<List<Suggestion>> GetAllSuggestionsAdm(string status, int suggestionNumber, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
+        public async Task<(List<Suggestion> Items, int Total)> GetAllSuggestionsAdm(string status, int suggestionNumber, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
         {
             var query = _context.Suggestions.AsQueryable();
 
@@ -79,9 +79,13 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
             query = query.OrderByDescending(s => s.CreatedAt);
 
-            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var total = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-            return await query.ToListAsync();
+            return (items, total);
         }
 
         public async Task<Suggestion?> GetSuggestionByNumber(int number)

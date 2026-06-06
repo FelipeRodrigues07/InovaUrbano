@@ -1,5 +1,17 @@
 import { api } from '@/services/api/api';
 
+export interface PaginationMeta {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: PaginationMeta;
+}
+
 export interface GetSuggestionsParams {
     numberSuggestion?: number;
     status?: string;
@@ -49,7 +61,7 @@ export const SuggestionsService = {
         ibgeId,
         pageNumber = 1,
         pageSize = 10,
-    }: GetSuggestionsParams): Promise<SuggestionsAdmModel[]> => {
+    }: GetSuggestionsParams): Promise<PaginatedResponse<SuggestionsAdmModel>> => {
         try {
             const params: Record<string, string | number> = {
                 NumberSuggestion: numberSuggestion,
@@ -63,7 +75,10 @@ export const SuggestionsService = {
                 params.IbgeId = ibgeId;
             }
 
-            const response = await api.get('/suggestions/adm', { params });
+            const response = await api.get<PaginatedResponse<SuggestionsAdmModel>>(
+                '/suggestions/adm',
+                { params },
+            );
             return response.data;
         } catch (error) {
             console.error('Falha na requisição:', error);
@@ -78,7 +93,6 @@ export const SuggestionsService = {
         lonMax,
         status,
     }: GetSuggestionsByAreaParams): Promise<GetAllSuggestionsAreaModel[]> => {
-
         try {
             const response = await api.get('/suggestions/area', {
                 params: {

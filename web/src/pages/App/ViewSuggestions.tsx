@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { SuggestionsService } from '@/services/api/SuggestionsService';
-import type { SuggestionsAdmModel } from '@/services/api/SuggestionsService';
+import type { SuggestionsAdmModel, PaginationMeta } from '@/services/api/SuggestionsService';
 import { DEFAULT_UF_ID } from '@/services/api/CitiesService';
 import { useCity } from '@/contexts/CityContext';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -63,8 +63,35 @@ const ViewSuggestions: React.FC = () => {
   const [numberSuggestion, setNumberSuggestion] = useState<number | undefined>(undefined);
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [pageNumber, setPageNumber] = useState(1);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const pageSize = 10;
+
+  const hasMore = meta != null && meta.current_page < meta.last_page;
+
+  const fetchSuggestions = async (pageNumber: number, loadMore = false) => {
+    if (!cityId) return;
+
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const result = await SuggestionsService.getSuggestions({
+        numberSuggestion,
+        status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
+        dateCalendar: selectedDate,
+        ibgeId: parseInt(cityId, 10),
+        pageNumber,
+        pageSize,
+      });
+
+      setSuggestions(prev => (loadMore ? [...prev, ...result.data] : result.data));
+      setMeta(result.meta);
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (citiesLoading || !cityId) return;
@@ -74,10 +101,9 @@ const ViewSuggestions: React.FC = () => {
     (async () => {
       setIsLoading(true);
       setIsError(false);
-      setPageNumber(2);
 
       try {
-        const data = await SuggestionsService.getSuggestions({
+        const result = await SuggestionsService.getSuggestions({
           numberSuggestion,
           status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
           dateCalendar: selectedDate,
@@ -86,7 +112,10 @@ const ViewSuggestions: React.FC = () => {
           pageSize,
         });
 
-        if (!cancelled) setSuggestions(data);
+        if (!cancelled) {
+          setSuggestions(result.data);
+          setMeta(result.meta);
+        }
       } catch {
         if (!cancelled) setIsError(true);
       } finally {
@@ -99,34 +128,9 @@ const ViewSuggestions: React.FC = () => {
     };
   }, [selectedType, numberSuggestion, selectedDate, cityId, citiesLoading]);
 
-  const getSuggestions = async (loadMore = false) => {
-    if (!cityId) return;
-
-    setIsLoading(true);
-    setIsError(false);
-
-    try {
-      const newSuggestions = await SuggestionsService.getSuggestions({
-        numberSuggestion,
-        status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
-        dateCalendar: selectedDate,
-        ibgeId: parseInt(cityId, 10),
-        pageNumber: loadMore ? pageNumber + 1 : 1,
-        pageSize,
-      });
-
-      setSuggestions(prevSuggestions =>
-        loadMore ? [...prevSuggestions, ...newSuggestions] : newSuggestions
-      );
-
-      if (loadMore) {
-        setPageNumber(prevPageNumber => prevPageNumber + 1);
-      }
-    } catch (error) {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
+  const loadMoreSuggestions = () => {
+    if (!hasMore || isLoading) return;
+    fetchSuggestions((meta?.current_page ?? 0) + 1, true);
   };
 
   const handleClearFilters = () => {
@@ -234,7 +238,7 @@ const ViewSuggestions: React.FC = () => {
         )}
         {isError && (
           <p className="col-span-full text-center text-red-500">
-            Erro ao carregar postagens.
+            Erro ao carregar sugestões.
           </p>
         )}
         {suggestions.length === 0 && !isLoading && !isError && (
@@ -302,13 +306,13 @@ const ViewSuggestions: React.FC = () => {
           </div>
         ))}
       </div>
-      {suggestions.length > 0 && (
+      {hasMore && (
         <div className="mt-5">
           {isLoading ? (
             <p className="text-center text-gray-500">Carregando mais...</p>
           ) : (
             <button
-              onClick={() => getSuggestions(true)}
+              onClick={loadMoreSuggestions}
               className="px-5 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-700 transition"
             >
               Carregar Mais

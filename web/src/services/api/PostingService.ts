@@ -1,4 +1,7 @@
 import { api } from '@/services/api/api';
+import type { PaginatedResponse, PaginationMeta } from '@/services/api/SuggestionsService';
+
+export type { PaginatedResponse, PaginationMeta };
 
 export interface GetPostingParams {
     numberSuggestion?: number;
@@ -31,7 +34,7 @@ export const PostingService = {
         ibgeId,
         pageNumber = 1,
         pageSize = 10,
-    }: GetPostingParams): Promise<PostingAdmModel[]> => {
+    }: GetPostingParams): Promise<PaginatedResponse<PostingAdmModel>> => {
         try {
             const params: Record<string, string | number> = {
                 NumberSuggestion: numberSuggestion,
@@ -45,7 +48,9 @@ export const PostingService = {
                 params.IbgeId = ibgeId;
             }
 
-            const response = await api.get('/posts/adm', { params });
+            const response = await api.get<PaginatedResponse<PostingAdmModel>>('/posts/adm', {
+                params,
+            });
             return response.data;
         } catch (error) {
             console.error('Falha na requisição:', error);

@@ -20,7 +20,7 @@ namespace ApiUrbanPlanning.UseCase.Post
             _suggestionRepository = suggestionRepository;
         }
 
-        public async Task<List<GetAllPostAdmResponse>> Execute(
+        public async Task<PaginatedAdmResponse<GetAllPostAdmResponse>> Execute(
             int NumberSuggestion,
             string Status,
             string DateCalendar,
@@ -28,21 +28,21 @@ namespace ApiUrbanPlanning.UseCase.Post
             int pageNumber,
             int pageSize)
         {
-
             DateTime? selectedDate = string.IsNullOrEmpty(DateCalendar)
                           ? (DateTime?)null
                           : DateTime.SpecifyKind(DateTime.Parse(DateCalendar), DateTimeKind.Utc);
 
-            var posts = await _repository.GetAllPostAdm(NumberSuggestion, Status, selectedDate, ibgeId, pageNumber, pageSize);
-            var suggestionsResponse = new List<GetAllPostAdmResponse>();
+            var (posts, total) = await _repository.GetAllPostAdm(
+                NumberSuggestion, Status, selectedDate, ibgeId, pageNumber, pageSize);
 
+            var postsResponse = new List<GetAllPostAdmResponse>();
 
             foreach (var post in posts)
             {
                 var user = await _userRepository.GetUserById(post.UserId);
                 var suggestion = await _suggestionRepository.GetSuggestionById(post.SuggestionId);
 
-                suggestionsResponse.Add(new GetAllPostAdmResponse
+                postsResponse.Add(new GetAllPostAdmResponse
                 {
                     Id = post.Id,
                     Title = post.Title,
@@ -51,15 +51,18 @@ namespace ApiUrbanPlanning.UseCase.Post
                     UserId = post.UserId,
                     PostImageUrl = post.PostImageUrl,
                     Number = post.Number,
-                    NumberSuggestion = post.NumberSuggestion,   
+                    NumberSuggestion = post.NumberSuggestion,
                     CreatedAt = post.CreatedAt,
                     UserName = user.Name,
                     ProfilePictureUrl = user.ProfilePictureUrl
                 });
             }
-            return suggestionsResponse;
 
-
+            return new PaginatedAdmResponse<GetAllPostAdmResponse>
+            {
+                Data = postsResponse,
+                Meta = PaginationMeta.Create(pageNumber, pageSize, total),
+            };
         }
     }
 }

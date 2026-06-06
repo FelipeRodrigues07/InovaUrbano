@@ -15,16 +15,22 @@ namespace ApiUrbanPlanning.UseCase.Suggestions
             _userRepository = userRepository;
         }
 
-        public async Task<List<GetAllSuggestionsAdmResponse>> Execute(string Status, int NumberSuggestion, string DateCalendar, int? ibgeId, int pageNumber, int pageSize)
+        public async Task<PaginatedAdmResponse<GetAllSuggestionsAdmResponse>> Execute(
+            string Status,
+            int NumberSuggestion,
+            string DateCalendar,
+            int? ibgeId,
+            int pageNumber,
+            int pageSize)
         {
-
             DateTime? selectedDate = string.IsNullOrEmpty(DateCalendar)
                           ? (DateTime?)null
                           : DateTime.SpecifyKind(DateTime.Parse(DateCalendar), DateTimeKind.Utc);
 
-            var suggestions = await _repository.GetAllSuggestionsAdm(Status, NumberSuggestion, selectedDate, ibgeId, pageNumber, pageSize);
-            var suggestionsResponse = new List<GetAllSuggestionsAdmResponse>();
+            var (suggestions, total) = await _repository.GetAllSuggestionsAdm(
+                Status, NumberSuggestion, selectedDate, ibgeId, pageNumber, pageSize);
 
+            var suggestionsResponse = new List<GetAllSuggestionsAdmResponse>();
 
             foreach (var suggestion in suggestions)
             {
@@ -46,10 +52,12 @@ namespace ApiUrbanPlanning.UseCase.Suggestions
                     ProfilePictureUrl = user.ProfilePictureUrl
                 });
             }
-            return suggestionsResponse;
 
-           
+            return new PaginatedAdmResponse<GetAllSuggestionsAdmResponse>
+            {
+                Data = suggestionsResponse,
+                Meta = PaginationMeta.Create(pageNumber, pageSize, total),
+            };
         }
-
     }
 }

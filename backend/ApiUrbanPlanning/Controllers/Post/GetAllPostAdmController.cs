@@ -20,7 +20,7 @@ namespace ApiUrbanPlanning.Controllers.Post
 
         [HttpGet("posts/adm")]
         [Authorize]
-        [ProducesResponseType(typeof(List<GetAllPostAdmResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedAdmResponse<GetAllPostAdmResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(
             [FromQuery] int? NumberSuggestion,

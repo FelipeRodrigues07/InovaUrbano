@@ -22,7 +22,7 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Post>> GetAllPostAdm(int numberSuggestion, string status, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
+        public async Task<(List<Post> Items, int Total)> GetAllPostAdm(int numberSuggestion, string status, DateTime? DateCalendar, int? ibgeId, int pageNumber, int pageSize)
         {
             var query = _context.Posts.AsQueryable();
 
@@ -52,9 +52,13 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
 
             query = query.OrderByDescending(p => p.CreatedAt);
 
-            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var total = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-            return await query.ToListAsync();
+            return (items, total);
         }
 
 

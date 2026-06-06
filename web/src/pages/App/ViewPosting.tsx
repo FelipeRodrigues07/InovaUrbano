@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { PostingService } from '@/services/api/PostingService';
-import type { PostingAdmModel } from '@/services/api/PostingService';
+import type { PostingAdmModel, PaginationMeta } from '@/services/api/PostingService';
 import { DEFAULT_UF_ID } from '@/services/api/CitiesService';
 import { useCity } from '@/contexts/CityContext';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -61,8 +61,35 @@ const ViewPostings: React.FC = () => {
   const [numberSuggestion, setNumberSuggestion] = useState<number | undefined>(undefined);
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [pageNumber, setPageNumber] = useState(1);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const pageSize = 10;
+
+  const hasMore = meta != null && meta.current_page < meta.last_page;
+
+  const fetchPostings = async (pageNumber: number, loadMore = false) => {
+    if (!cityId) return;
+
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const result = await PostingService.getPosting({
+        numberSuggestion,
+        status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
+        dateCalendar: selectedDate,
+        ibgeId: parseInt(cityId, 10),
+        pageNumber,
+        pageSize,
+      });
+
+      setPostings(prev => (loadMore ? [...prev, ...result.data] : result.data));
+      setMeta(result.meta);
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (citiesLoading || !cityId) return;
@@ -72,10 +99,9 @@ const ViewPostings: React.FC = () => {
     (async () => {
       setIsLoading(true);
       setIsError(false);
-      setPageNumber(2);
 
       try {
-        const data = await PostingService.getPosting({
+        const result = await PostingService.getPosting({
           numberSuggestion,
           status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
           dateCalendar: selectedDate,
@@ -84,7 +110,10 @@ const ViewPostings: React.FC = () => {
           pageSize,
         });
 
-        if (!cancelled) setPostings(data);
+        if (!cancelled) {
+          setPostings(result.data);
+          setMeta(result.meta);
+        }
       } catch {
         if (!cancelled) setIsError(true);
       } finally {
@@ -97,34 +126,9 @@ const ViewPostings: React.FC = () => {
     };
   }, [selectedType, numberSuggestion, selectedDate, cityId, citiesLoading]);
 
-  const getPostings = async (loadMore = false) => {
-    if (!cityId) return;
-
-    setIsLoading(true);
-    setIsError(false);
-
-    try {
-      const newPostings = await PostingService.getPosting({
-        numberSuggestion,
-        status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
-        dateCalendar: selectedDate,
-        ibgeId: parseInt(cityId, 10),
-        pageNumber: loadMore ? pageNumber + 1 : 1,
-        pageSize,
-      });
-
-      setPostings(prevPosting =>
-        loadMore ? [...prevPosting, ...newPostings] : newPostings
-      );
-
-      if (loadMore) {
-        setPageNumber(prevPageNumber => prevPageNumber + 1);
-      }
-    } catch (error) {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
+  const loadMorePostings = () => {
+    if (!hasMore || isLoading) return;
+    fetchPostings((meta?.current_page ?? 0) + 1, true);
   };
 
   const handleClearFilters = () => {
@@ -286,13 +290,13 @@ const ViewPostings: React.FC = () => {
         ))}
       </div>
 
-      {postings.length > 0 && (
+      {hasMore && (
         <div className="mt-5">
           {isLoading ? (
             <p className="text-center text-gray-500">Carregando mais...</p>
           ) : (
             <button
-              onClick={() => getPostings(true)}
+              onClick={loadMorePostings}
               className="px-5 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-700 transition"
             >
               Carregar Mais
