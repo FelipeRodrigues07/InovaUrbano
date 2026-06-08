@@ -63,6 +63,53 @@ namespace apiUrbanPlanning.Migrations
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.Municipality", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ContractEndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ContractStartsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IbgeId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IbgeId")
+                        .IsUnique();
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("Municipalities");
+                });
+
             modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.Suggestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -75,6 +122,9 @@ namespace apiUrbanPlanning.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("IbgeId")
+                        .HasColumnType("integer");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
@@ -95,9 +145,6 @@ namespace apiUrbanPlanning.Migrations
                     b.Property<string>("SuggestionImageUrl")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int?>("IbgeId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -126,6 +173,9 @@ namespace apiUrbanPlanning.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("MunicipalityId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -138,17 +188,19 @@ namespace apiUrbanPlanning.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("RefreshToken")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MunicipalityId");
 
                     b.ToTable("Users");
                 });
@@ -162,6 +214,21 @@ namespace apiUrbanPlanning.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.User", b =>
+                {
+                    b.HasOne("apiUrbanPlanning.Infrastructure.Models.Municipality", "Municipality")
+                        .WithMany("Users")
+                        .HasForeignKey("MunicipalityId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Municipality");
+                });
+
+            modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.Municipality", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("apiUrbanPlanning.Infrastructure.Models.User", b =>

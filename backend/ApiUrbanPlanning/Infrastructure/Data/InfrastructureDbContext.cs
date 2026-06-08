@@ -14,6 +14,7 @@ namespace apiUrbanPlanning.Infrastructure.Data
         public DbSet<User> Users { get; set; }  
         public DbSet<Suggestion>  Suggestions { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Municipality> Municipalities { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +37,21 @@ namespace apiUrbanPlanning.Infrastructure.Data
                 .Property(s => s.Number)
                 .ValueGeneratedOnAdd()
                 .UseIdentityColumn();
+
+            modelBuilder.Entity<Municipality>()
+                .ToTable("Municipalities")
+                .HasIndex(m => m.IbgeId)
+                .IsUnique();
+
+            modelBuilder.Entity<Municipality>()
+                .HasIndex(m => m.Slug)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Municipality)
+                .WithMany(m => m.Users)
+                .HasForeignKey(u => u.MunicipalityId)
+                .OnDelete(DeleteBehavior.SetNull);
 
         }
 

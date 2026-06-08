@@ -13,6 +13,7 @@ using ApiUrbanPlanning.UseCase.Users;
 using ApiUrbanPlanning.UseCase.Suggestions;
 using ApiUrbanPlanning.Infrastructure.Repositories;
 using ApiUrbanPlanning.UseCase.Post;
+using apiUrbanPlanning.UseCase.Municipalities;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,10 @@ builder.Services.AddScoped<InterfaceUser, RepositoryUser>();
 builder.Services.AddScoped<CreateAccountUseCase>();
 builder.Services.AddScoped<InterfaceSuggestion, RepositorySuggestion>();
 builder.Services.AddScoped<InterfacePost, RepositoryPost>();
+builder.Services.AddScoped<InterfaceMunicipality, RepositoryMunicipality>();
+builder.Services.AddScoped<CreateMunicipalityUseCase>();
+builder.Services.AddScoped<UpdateMunicipalityUseCase>();
+builder.Services.AddScoped<GetAllMunicipalitiesUseCase>();
 builder.Services.AddScoped<CreateSuggestionUseCase>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthenticateUseCase>();
