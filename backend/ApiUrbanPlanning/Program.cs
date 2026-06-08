@@ -14,6 +14,7 @@ using ApiUrbanPlanning.UseCase.Suggestions;
 using ApiUrbanPlanning.Infrastructure.Repositories;
 using ApiUrbanPlanning.UseCase.Post;
 using apiUrbanPlanning.UseCase.Municipalities;
+using apiUrbanPlanning.Infrastructure.Data.Seed;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -103,6 +104,15 @@ builder.Services.AddSwaggerGen();
 //});
 
 var app = builder.Build();
+
+if (args.Contains("seed"))
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
+    await MockSeedRunner.RunAsync(context);
+    Console.WriteLine("Seed concluído.");
+    return;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
