@@ -108,8 +108,123 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
             }
         }
 
+        public async Task<SuggestionsAnalyticsData> GetSuggestionsAnalytics(
+            string status,
+            int? ibgeId,
+            DateTime? dateFrom,
+            DateTime? dateTo,
+            string groupBy)
+        {
+            var query = _context.Suggestions.AsQueryable();
 
+            if (!string.IsNullOrEmpty(status) && status != "Todas")
+            {
+                query = query.Where(s => s.Status == status);
+            }
 
+            if (ibgeId.HasValue && ibgeId.Value > 0)
+            {
+                query = query.Where(s => s.IbgeId == ibgeId.Value);
+            }
+
+            if (dateFrom.HasValue)
+            {
+                query = query.Where(s => s.CreatedAt >= dateFrom.Value);
+            }
+
+            if (dateTo.HasValue)
+            {
+                var endExclusive = dateTo.Value.Date.AddDays(1);
+                query = query.Where(s => s.CreatedAt < endExclusive);
+            }
+
+            var total = await query.CountAsync();
+
+            var byStatus = await query
+                .GroupBy(s => s.Status)
+                .Select(g => new AnalyticsCountItem { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            var byType = await query
+                .GroupBy(s => s.Type)
+                .Select(g => new AnalyticsCountItem { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            List<AnalyticsTimeSeriesItem> timeSeries;
+
+            if (groupBy == "year")
+            {
+                var yearly = await query
+                    .GroupBy(s => s.CreatedAt.Year)
+                    .Select(g => new
+                    {
+                        Year = g.Key,
+                        Count = g.Count(),
+                    })
+                    .OrderBy(x => x.Year)
+                    .ToListAsync();
+
+                timeSeries = yearly
+                    .Select(x => new AnalyticsTimeSeriesItem
+                    {
+                        Period = x.Year.ToString(),
+                        Count = x.Count,
+                    })
+                    .ToList();
+            }
+            else if (groupBy == "day")
+            {
+                var daily = await query
+                    .GroupBy(s => s.CreatedAt.Date)
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        Count = g.Count(),
+                    })
+                    .OrderBy(x => x.Date)
+                    .ToListAsync();
+
+                timeSeries = daily
+                    .Select(x => new AnalyticsTimeSeriesItem
+                    {
+                        Period = x.Date.ToString("yyyy-MM-dd"),
+                        Count = x.Count,
+                    })
+                    .ToList();
+            }
+            else
+            {
+                var monthly = await query
+                    .GroupBy(s => new { s.CreatedAt.Year, s.CreatedAt.Month })
+                    .Select(g => new
+                    {
+                        g.Key.Year,
+                        g.Key.Month,
+                        Count = g.Count(),
+                    })
+                    .OrderBy(x => x.Year)
+                    .ThenBy(x => x.Month)
+                    .ToListAsync();
+
+                timeSeries = monthly
+                    .Select(x => new AnalyticsTimeSeriesItem
+                    {
+                        Period = $"{x.Year:D4}-{x.Month:D2}",
+                        Count = x.Count,
+                    })
+                    .ToList();
+            }
+
+            return new SuggestionsAnalyticsData
+            {
+                Total = total,
+                TimeSeries = timeSeries,
+                ByStatus = byStatus,
+                ByType = byType,
+            };
+        }
 
     }
 

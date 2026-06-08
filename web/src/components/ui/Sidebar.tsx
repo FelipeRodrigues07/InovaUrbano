@@ -4,7 +4,8 @@ import {
   BsPencilSquare,
   BsFiles,
   BsBoxArrowRight,
-  BsChatText
+  BsChatText,
+  BsBarChartLine,
 } from 'react-icons/bs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -57,6 +58,13 @@ const Sidebar: React.FC = () => {
             <span className="inline-flex items-center gap-4 pl-4 h-12 py-0 rounded-r-full w-full text-white hover:bg-indigo-50 hover:text-black  transition-all ease-in-out delay-100 duration-200">
               <BsFiles className="relative text-lg" />
               <span className="max-md:opacity-0 max-md:hidden">Ver Postagens </span>
+            </span>
+          </Link>
+
+          <Link to="/analytics">
+            <span className="inline-flex items-center gap-4 pl-4 h-12 py-0 rounded-r-full text-white w-full hover:bg-indigo-50 hover:text-black transition-all ease-in-out delay-100 duration-200">
+              <BsBarChartLine className="relative text-lg" />
+              <span className="max-md:opacity-0 max-md:hidden">Análise</span>
             </span>
           </Link>
 

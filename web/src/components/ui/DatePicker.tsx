@@ -4,7 +4,7 @@ import * as React from "react"
 import { ChevronDownIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
@@ -18,31 +18,35 @@ interface DatePickerProps {
   onChange: (date: string) => void
   className?: string
   size?: "sm" | "default"
+  placeholder?: string
 }
 
-export function DatePicker({ value, onChange, className, size = "default" }: DatePickerProps) {
+export function DatePicker({
+  value,
+  onChange,
+  className,
+  size = "default",
+  placeholder = "Data",
+}: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
   const selectedDate = value ? new Date(value) : undefined
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          id="date"
-          size={size}
-          className={cn(
-            "justify-between font-normal bg-white",
-            size === "sm" ? "w-36" : "w-48",
-            className
-          )}
-        >
-          {selectedDate
-            ? format(selectedDate, "dd/MM/yyyy")
-            : "Data"}
-          <ChevronDownIcon className="size-3.5 opacity-50" />
-        </Button>
+      <PopoverTrigger
+        type="button"
+        className={cn(
+          buttonVariants({ variant: "outline", size }),
+          "justify-between font-normal bg-white",
+          size === "sm" ? "w-36" : "w-48",
+          className
+        )}
+      >
+        {selectedDate
+          ? format(selectedDate, "dd/MM/yyyy")
+          : placeholder}
+        <ChevronDownIcon className="size-3.5 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="start">
         <Calendar

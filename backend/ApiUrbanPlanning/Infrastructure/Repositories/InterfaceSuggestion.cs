@@ -16,5 +16,12 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
 
         Task<Suggestion> GetSuggestionById(Guid id);
 
+        Task<SuggestionsAnalyticsData> GetSuggestionsAnalytics(
+            string status,
+            int? ibgeId,
+            DateTime? dateFrom,
+            DateTime? dateTo,
+            string groupBy);
+
     }
 }

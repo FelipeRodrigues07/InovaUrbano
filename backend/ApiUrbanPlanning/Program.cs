@@ -39,6 +39,7 @@ builder.Services.AddScoped<UpdatePasswordUseCase>();
 builder.Services.AddScoped<UpdateEmailUseCase>();
 builder.Services.AddScoped<UpdateNameUseCase>();
 builder.Services.AddScoped<GetAllSuggestionsAdmUseCase>();
+builder.Services.AddScoped<GetSuggestionsAnalyticsUseCase>();
 builder.Services.AddScoped<CreatePostUseCase>();
 builder.Services.AddScoped<GetAllPostAdmUseCase>();
 builder.Services.AddScoped<GetAllPostsFeedUseCase>();

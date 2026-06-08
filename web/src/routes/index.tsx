@@ -10,6 +10,7 @@ import ViewSuggestions from '@/pages/App/ViewSuggestions';
 import ViewPostings from '@/pages/App/ViewPosting';
 import PostingArea from '@/pages/App/PostingArea';
 import SuggestionsMapPage from '@/pages/App/Dashboard';
+import Analytics from '@/pages/App/Analytics';
 import Profile from '@/pages/App/Profile';
 
 
@@ -24,6 +25,7 @@ export const AppRoutes: React.FC = () => {
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<SuggestionsMapPage />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/view-suggestions" element={<ViewSuggestions />} />
             <Route path="/view-postings" element={<ViewPostings />} />
             <Route path="/profile" element={<Profile />} />
