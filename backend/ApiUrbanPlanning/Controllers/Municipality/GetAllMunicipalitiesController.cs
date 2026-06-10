@@ -1,3 +1,4 @@
+using apiUrbanPlanning.Infrastructure.Constants;
 using apiUrbanPlanning.Response;
 using apiUrbanPlanning.UseCase.Municipalities;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,7 @@ namespace apiUrbanPlanning.Controllers.Municipality
         }
 
         [HttpGet("municipalities")]
-        [Authorize]
+        [Authorize(Roles = UserRoles.SuperAdmin)]
         [ProducesResponseType(typeof(List<MunicipalityResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {

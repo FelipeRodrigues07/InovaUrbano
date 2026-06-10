@@ -21,12 +21,16 @@ namespace apiUrbanPlanning.Infrastructure.Repositories.user
 
         public async Task<User> GetUserById(Guid id)
         {
-            return await _context.Set<User>().FindAsync(id);
+            return await _context.Set<User>()
+                .Include(u => u.Municipality)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User> GetUserByEmail(string email)
         {
-            return await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Set<User>()
+                .Include(u => u.Municipality)
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task UpdateUser(User user)

@@ -42,6 +42,24 @@ async function loadAllMunicipios(): Promise<MunicipioSource[]> {
 }
 
 export const CitiesService = {
+  async findCityByIbgeId(
+    ibgeId: number
+  ): Promise<{ city: CityDto; ufId: number } | null> {
+    const all = await loadAllMunicipios();
+    const match = all.find((m) => m.codigo_ibge === ibgeId);
+    if (!match) return null;
+
+    return {
+      ufId: match.codigo_uf,
+      city: {
+        id: String(match.codigo_ibge),
+        name: match.nome,
+        latitude: match.latitude,
+        longitude: match.longitude,
+      },
+    };
+  },
+
   async getBrazilUfs(): Promise<UfDto[]> {
     const res = await fetch(BRASIL_API_UFS);
     if (!res.ok) {

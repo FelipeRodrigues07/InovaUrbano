@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi'; 
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { canAccessAdminPanel } from '@/lib/userRoles';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -10,17 +11,31 @@ const SignIn: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const stateError = (location.state as { error?: string } | null)?.error;
+    if (stateError) {
+      setError(stateError);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null); 
     try {
-      await signIn(email, password); 
-      console.log('Login bem-sucedido!');
-      navigate('/dashboard', { replace: true }); 
+      const profile = await signIn(email, password);
+
+      if (!canAccessAdminPanel(profile.role)) {
+        await signOut();
+        setError('Sua conta não tem permissão para acessar o painel administrativo.');
+        return;
+      }
+
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       console.error('Erro no login:', err);
      

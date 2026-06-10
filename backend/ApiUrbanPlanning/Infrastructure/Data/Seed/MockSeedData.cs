@@ -4,6 +4,14 @@ namespace apiUrbanPlanning.Infrastructure.Data.Seed
 {
     public static class MockSeedData
     {
+        public static class SuperAdmin
+        {
+            public const string Name = "Super Admin";
+            public const string Email = "super@inovaurbano.local";
+            public const string Password = "Super@123";
+            public const string Role = UserRoles.SuperAdmin;
+        }
+
         public static class Anapolis
         {
             public const int IbgeId = 5201108;

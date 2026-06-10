@@ -90,6 +90,16 @@ namespace apiUrbanPlanning.Infrastructure.Services
                 claims.Add(new Claim("token_type", tokenType));
             }
 
+            if (user.MunicipalityId.HasValue)
+            {
+                claims.Add(new Claim("municipality_id", user.MunicipalityId.Value.ToString()));
+            }
+
+            if (user.Municipality != null)
+            {
+                claims.Add(new Claim("ibge_id", user.Municipality.IbgeId.ToString()));
+            }
+
             var handler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_secret);
 

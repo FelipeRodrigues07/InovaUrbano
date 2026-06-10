@@ -1,6 +1,7 @@
+using apiUrbanPlanning.Infrastructure.Authorization;
+using apiUrbanPlanning.Infrastructure.Constants;
 using ApiUrbanPlanning.Response;
 using ApiUrbanPlanning.UseCase.Post;
-using ApiUrbanPlanning.UseCase.Suggestions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,8 +20,9 @@ namespace ApiUrbanPlanning.Controllers.Post
         }
 
         [HttpGet("posts/adm")]
-        [Authorize]
+        [Authorize(Roles = UserRoles.AdminPanel)]
         [ProducesResponseType(typeof(PaginatedAdmResponse<GetAllPostAdmResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(
             [FromQuery] int? NumberSuggestion,
@@ -30,11 +32,17 @@ namespace ApiUrbanPlanning.Controllers.Post
             [FromQuery] int pageNumber,
             [FromQuery] int pageSize)
         {
+            var effectiveIbgeId = TenantIbgeResolver.ResolveEffectiveIbgeId(User, IbgeId);
+            if (TenantIbgeResolver.RequiresTenantIbge(User) && effectiveIbgeId == null)
+            {
+                return Forbid();
+            }
+
             var posts = await _getAllPostAdmUseCase.Execute(
                 NumberSuggestion ?? 0,
                 Status ?? string.Empty,
                 DateCalendar ?? string.Empty,
-                IbgeId,
+                effectiveIbgeId,
                 pageNumber,
                 pageSize);
             return Ok(posts);

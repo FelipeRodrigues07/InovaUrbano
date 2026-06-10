@@ -53,8 +53,8 @@ namespace ApiUrbanPlanning.UseCase.Post
                     Number = post.Number,
                     NumberSuggestion = post.NumberSuggestion,
                     CreatedAt = post.CreatedAt,
-                    UserName = user.Name,
-                    ProfilePictureUrl = user.ProfilePictureUrl
+                    UserName = user?.Name ?? string.Empty,
+                    ProfilePictureUrl = user?.ProfilePictureUrl ?? string.Empty
                 });
             }
 

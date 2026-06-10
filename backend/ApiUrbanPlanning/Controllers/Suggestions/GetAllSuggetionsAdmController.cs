@@ -1,3 +1,5 @@
+using apiUrbanPlanning.Infrastructure.Authorization;
+using apiUrbanPlanning.Infrastructure.Constants;
 using apiUrbanPlanning.Response;
 using ApiUrbanPlanning.Response;
 using ApiUrbanPlanning.UseCase.Suggestions;
@@ -19,8 +21,9 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
         }
 
         [HttpGet("suggestions/adm")]
-        [Authorize]
+        [Authorize(Roles = UserRoles.AdminPanel)]
         [ProducesResponseType(typeof(PaginatedAdmResponse<GetAllSuggestionsAdmResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllSuggestionsAdm(
             [FromQuery] int? NumberSuggestion,
@@ -30,15 +33,20 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
             [FromQuery] int pageNumber,
             [FromQuery] int pageSize)
         {
+            var effectiveIbgeId = TenantIbgeResolver.ResolveEffectiveIbgeId(User, IbgeId);
+            if (TenantIbgeResolver.RequiresTenantIbge(User) && effectiveIbgeId == null)
+            {
+                return Forbid();
+            }
+
             var suggestions = await _getAllSuggestionsAdmUseCase.Execute(
                 Status ?? string.Empty,
                 NumberSuggestion ?? 0,
                 DateCalendar ?? string.Empty,
-                IbgeId,
+                effectiveIbgeId,
                 pageNumber,
                 pageSize);
             return Ok(suggestions);
         }
     }
 }
-

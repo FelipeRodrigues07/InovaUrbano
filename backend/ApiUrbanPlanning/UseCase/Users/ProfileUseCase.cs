@@ -1,8 +1,6 @@
-﻿using apiUrbanPlanning.Infrastructure.Models;
-using apiUrbanPlanning.Infrastructure.Repositories;
+﻿using apiUrbanPlanning.Infrastructure.Repositories;
+using apiUrbanPlanning.Response;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace apiUrbanPlanning.UseCase.Users
 {
@@ -16,7 +14,7 @@ namespace apiUrbanPlanning.UseCase.Users
        }
 
 
-        public async Task<User> Execute(string token)
+        public async Task<ProfileResponse> Execute(string token)
         {
             // Valida o token e decodifica para pegar o ID do usuário
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -42,7 +40,18 @@ namespace apiUrbanPlanning.UseCase.Users
                 throw new KeyNotFoundException("Usuário não encontrado.");
             }
 
-            return user;
+            return new ProfileResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Role = user.Role,
+                MunicipalityId = user.MunicipalityId,
+                IbgeId = user.Municipality?.IbgeId,
+                MunicipalityName = user.Municipality?.Name,
+                MunicipalityState = user.Municipality?.State,
+            };
 
         }
     }

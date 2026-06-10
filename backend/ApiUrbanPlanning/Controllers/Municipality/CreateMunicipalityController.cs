@@ -1,3 +1,4 @@
+using apiUrbanPlanning.Infrastructure.Constants;
 using apiUrbanPlanning.Requests;
 using apiUrbanPlanning.Response;
 using apiUrbanPlanning.UseCase.Municipalities;
@@ -19,7 +20,7 @@ namespace apiUrbanPlanning.Controllers.Municipality
         }
 
         [HttpPost("municipalities")]
-        [Authorize]
+        [Authorize(Roles = UserRoles.SuperAdmin)]
         [ProducesResponseType(typeof(MunicipalityResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]

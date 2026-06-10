@@ -21,13 +21,18 @@ export interface UserProfile {
   email: string;
   name: string;
   profilePictureUrl: string;
+  role: string;
+  municipalityId?: string | null;
+  ibgeId?: number | null;
+  municipalityName?: string | null;
+  municipalityState?: string | null;
 }
 
 interface AuthContextType {
   token: string | null;
   userProfile: UserProfile | null;
   isLoadingUserStorageData: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<UserProfile>;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<UserProfile>;
 }
@@ -53,12 +58,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (storedToken) {
         setToken(storedToken);
         api.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
+        await fetchProfile();
       } else {
         delete api.defaults.headers.common.Authorization;
-      }
-
-      if (storedUserProfile) {
-        setUserProfile(storedUserProfile);
+        if (storedUserProfile) {
+          setUserProfile(storedUserProfile);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar dados do usuário do storage:', error);
@@ -75,7 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUserData();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<UserProfile> => {
     try {
       const response = await api.post<AuthTokensResponse>('/authenticate', {
         email,
@@ -85,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       persistAuthTokens(response.data);
       setToken(response.data.token);
 
-      await fetchProfile();
+      return await fetchProfile();
     } catch (error) {
       clearAuthSession();
       await storageUser.removeUserProfile();

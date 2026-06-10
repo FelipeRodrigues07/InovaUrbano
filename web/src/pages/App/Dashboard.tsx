@@ -4,17 +4,10 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 import { SuggestionsService } from '@/services/api/SuggestionsService';
-import { DEFAULT_UF_ID } from '@/services/api/CitiesService';
 import { useCity } from '@/contexts/CityContext';
+import { CityFilter } from '@/components/ui/CityFilter';
 
 import type { GetAllSuggestionsAreaModel } from '@/services/api/SuggestionsService';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 
 // Corrige ícone padrão do Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -45,18 +38,7 @@ function ChangeView({ lat, lng }: { lat: number; lng: number }) {
 }
 
 export default function SuggestionsMapPage() {
-    const {
-        ufs,
-        ufsLoading,
-        ufId,
-        setUfId,
-        citiesList,
-        citiesLoading,
-        cityId,
-        setCityId,
-        selectedCity,
-        selectedUf,
-    } = useCity();
+    const { cityId, selectedCity, citiesLoading } = useCity();
 
     const [status, setStatus] = useState('Todas');
     const [suggestions, setSuggestions] = useState<GetAllSuggestionsAreaModel[]>([]);
@@ -154,77 +136,7 @@ export default function SuggestionsMapPage() {
     return (
         <div className="p-4 space-y-4 font-sans">
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-                <Select
-                    value={String(ufId)}
-                    onValueChange={(v) => setUfId(Number(v))}
-                    disabled={ufsLoading && ufs.length === 0}
-                >
-                    <SelectTrigger
-                        size="sm"
-                        className="w-[5.5rem] bg-white shadow-sm"
-                        aria-label="Estado"
-                    >
-                        <SelectValue placeholder="UF">
-                            {ufsLoading && ufs.length === 0
-                                ? '…'
-                                : (selectedUf?.sigla ?? 'GO')}
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent
-                        position="popper"
-                        sideOffset={4}
-                        className="z-[1100] max-h-52 w-[11rem] bg-white p-0"
-                    >
-                        {(ufs.length === 0
-                            ? [{ id: DEFAULT_UF_ID, sigla: 'GO', nome: 'Goiás' }]
-                            : ufs
-                        ).map((u) => (
-                            <SelectItem
-                                key={u.id}
-                                value={String(u.id)}
-                                className="py-1.5 pl-2 pr-7 text-sm"
-                            >
-                                <span className="font-medium tabular-nums">{u.sigla}</span>
-                                <span className="text-muted-foreground ml-1.5 truncate">
-                                    {u.nome}
-                                </span>
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select
-                    value={cityId || undefined}
-                    onValueChange={setCityId}
-                    disabled={citiesLoading || citiesList.length === 0}
-                >
-                    <SelectTrigger
-                        size="sm"
-                        className="w-[10.5rem] max-w-[min(100%,10.5rem)] bg-white shadow-sm"
-                        aria-label="Município"
-                    >
-                        <SelectValue placeholder="Município">
-                            {citiesLoading
-                                ? 'Carregando…'
-                                : (selectedCity?.name ?? 'Município')}
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent
-                        position="popper"
-                        sideOffset={4}
-                        className="z-[1100] max-h-52 w-[var(--radix-select-trigger-width)] min-w-[10.5rem] bg-white p-0"
-                    >
-                        {citiesList.map((c) => (
-                            <SelectItem
-                                key={c.id}
-                                value={c.id}
-                                className="py-1.5 pl-2 pr-7 text-sm"
-                            >
-                                {c.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <CityFilter />
 
                 <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
                     {statusList.map((s) => (

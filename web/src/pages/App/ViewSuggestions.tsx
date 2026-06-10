@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { SuggestionsService } from '@/services/api/SuggestionsService';
 import type { SuggestionsAdmModel, PaginationMeta } from '@/services/api/SuggestionsService';
-import { DEFAULT_UF_ID } from '@/services/api/CitiesService';
 import { useCity } from '@/contexts/CityContext';
+import { CityFilter } from '@/components/ui/CityFilter';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,19 +43,7 @@ const statusBadgeClass: Record<string, string> = {
 
 const ViewSuggestions: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    ufs,
-    ufsLoading,
-    ufId,
-    setUfId,
-    citiesList,
-    citiesLoading,
-    cityId,
-    setCityId,
-    selectedCity,
-    selectedUf,
-    resetToDefaultCity,
-  } = useCity();
+  const { cityId, citiesLoading, resetToDefaultCity, canSelectCity } = useCity();
 
   const [suggestions, setSuggestions] = useState<SuggestionsAdmModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +125,7 @@ const ViewSuggestions: React.FC = () => {
     setNumberSuggestion(undefined);
     setSelectedType('');
     setSelectedDate('');
-    resetToDefaultCity();
+    if (canSelectCity) resetToDefaultCity();
   };
 
   return (
@@ -146,47 +134,10 @@ const ViewSuggestions: React.FC = () => {
 
       <div className="sticky top-16 z-40 -mx-4 sm:-mx-5 px-4 sm:px-5 py-2 mb-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex flex-wrap justify-center items-center gap-2">
-          <Select
-            value={String(ufId)}
-            onValueChange={(v) => setUfId(Number(v))}
-            disabled={ufsLoading && ufs.length === 0}
-          >
-            <SelectTrigger size="sm" className="w-[4.5rem] bg-white" aria-label="Estado">
-              <SelectValue placeholder="UF">
-                {ufsLoading && ufs.length === 0 ? '…' : (selectedUf?.sigla ?? 'GO')}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent position="popper" sideOffset={4} className="z-[1100] max-h-52 bg-white">
-              {(ufs.length === 0
-                ? [{ id: DEFAULT_UF_ID, sigla: 'GO', nome: 'Goiás' }]
-                : ufs
-              ).map((u) => (
-                <SelectItem key={u.id} value={String(u.id)} className="text-sm">
-                  <span className="font-medium">{u.sigla}</span>
-                  <span className="text-muted-foreground ml-1.5 truncate">{u.nome}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={cityId || undefined}
-            onValueChange={setCityId}
-            disabled={citiesLoading || citiesList.length === 0}
-          >
-            <SelectTrigger size="sm" className="w-[9.5rem] bg-white" aria-label="Município">
-              <SelectValue placeholder="Município">
-                {citiesLoading ? '…' : (selectedCity?.name ?? 'Município')}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent position="popper" sideOffset={4} className="z-[1100] max-h-52 min-w-[9.5rem] bg-white">
-              {citiesList.map((c) => (
-                <SelectItem key={c.id} value={c.id} className="text-sm">
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CityFilter
+            ufTriggerClassName="w-[4.5rem] bg-white"
+            cityTriggerClassName="w-[9.5rem] bg-white"
+          />
 
           <Input
             type="number"

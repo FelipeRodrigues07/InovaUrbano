@@ -13,6 +13,8 @@ import {
 } from '@/services/api/CitiesService';
 import type { CityDto, UfDto } from '@/services/api/CitiesService';
 import { storageSelectedCity } from '@/storage/storageSelectedCity';
+import { useAuth } from '@/contexts/AuthContext';
+import { isSuperAdmin } from '@/lib/userRoles';
 
 interface CityContextType {
   ufs: UfDto[];
@@ -26,12 +28,18 @@ interface CityContextType {
   selectedCity: CityDto | undefined;
   selectedUf: UfDto | undefined;
   resetToDefaultCity: () => void;
+  canSelectCity: boolean;
+  isCityLocked: boolean;
 }
 
 const CityContext = createContext<CityContextType | undefined>(undefined);
 
 export const CityProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { userProfile, isLoadingUserStorageData } = useAuth();
   const stored = storageSelectedCity.getOrDefault();
+
+  const canSelectCity = isSuperAdmin(userProfile?.role);
+  const isCityLocked = !canSelectCity && !!userProfile?.ibgeId;
 
   const [ufs, setUfs] = useState<UfDto[]>([]);
   const [ufsLoading, setUfsLoading] = useState(true);
@@ -39,26 +47,34 @@ export const CityProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [citiesList, setCitiesList] = useState<CityDto[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
   const [cityId, setCityIdState] = useState(stored.cityId);
+  const [tenantLocked, setTenantLocked] = useState(false);
 
   const persist = useCallback((nextUfId: number, nextCityId: string) => {
+    if (!canSelectCity) return;
     storageSelectedCity.set({ ufId: nextUfId, cityId: nextCityId });
-  }, []);
+  }, [canSelectCity]);
 
-  const setUfId = useCallback((id: number) => {
-    setUfIdState(id);
-  }, []);
+  const setUfId = useCallback(
+    (id: number) => {
+      if (!canSelectCity) return;
+      setUfIdState(id);
+    },
+    [canSelectCity]
+  );
 
   const setCityId = useCallback(
     (id: string) => {
+      if (!canSelectCity) return;
       setCityIdState(id);
       persist(ufId, id);
     },
-    [ufId, persist]
+    [canSelectCity, ufId, persist]
   );
 
   const resetToDefaultCity = useCallback(() => {
+    if (!canSelectCity) return;
     setUfIdState(DEFAULT_UF_ID);
-  }, []);
+  }, [canSelectCity]);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +94,42 @@ export const CityProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   useEffect(() => {
+    if (isLoadingUserStorageData) return;
+
+    if (!userProfile || canSelectCity) {
+      setTenantLocked(false);
+      return;
+    }
+
+    if (!userProfile.ibgeId) return;
+
+    let cancelled = false;
+    (async () => {
+      setCitiesLoading(true);
+      setTenantLocked(true);
+      try {
+        const match = await CitiesService.findCityByIbgeId(userProfile.ibgeId!);
+        if (cancelled || !match) return;
+
+        setUfIdState(match.ufId);
+        setCityIdState(match.city.id);
+        const rows = await CitiesService.getCitiesByUf(match.ufId);
+        if (!cancelled) setCitiesList(rows);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setCitiesLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userProfile, isLoadingUserStorageData, canSelectCity]);
+
+  useEffect(() => {
+    if (tenantLocked || canSelectCity || isLoadingUserStorageData) return;
+
     let cancelled = false;
     (async () => {
       setCitiesLoading(true);
@@ -106,10 +158,28 @@ export const CityProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => {
       cancelled = true;
     };
-  }, [ufId, persist]);
+  }, [ufId, persist, tenantLocked, canSelectCity, isLoadingUserStorageData]);
 
-  const selectedCity = citiesList.find((c) => c.id === cityId);
-  const selectedUf = ufs.find((u) => u.id === ufId);
+  const selectedCity =
+    citiesList.find((c) => c.id === cityId) ??
+    (userProfile?.ibgeId
+      ? {
+          id: String(userProfile.ibgeId),
+          name: userProfile.municipalityName ?? 'Município',
+          latitude: 0,
+          longitude: 0,
+        }
+      : undefined);
+
+  const selectedUf =
+    ufs.find((u) => u.id === ufId) ??
+    (userProfile?.municipalityState
+      ? {
+          id: ufId,
+          sigla: userProfile.municipalityState,
+          nome: userProfile.municipalityState,
+        }
+      : undefined);
 
   return (
     <CityContext.Provider
@@ -125,6 +195,8 @@ export const CityProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         selectedCity,
         selectedUf,
         resetToDefaultCity,
+        canSelectCity,
+        isCityLocked,
       }}
     >
       {children}

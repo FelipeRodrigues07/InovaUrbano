@@ -1,3 +1,5 @@
+using apiUrbanPlanning.Infrastructure.Authorization;
+using apiUrbanPlanning.Infrastructure.Constants;
 using ApiUrbanPlanning.Response;
 using ApiUrbanPlanning.UseCase.Suggestions;
 using Microsoft.AspNetCore.Authorization;
@@ -18,8 +20,9 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
         }
 
         [HttpGet("suggestions/analytics")]
-        [Authorize]
+        [Authorize(Roles = UserRoles.AdminPanel)]
         [ProducesResponseType(typeof(SuggestionsAnalyticsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAnalytics(
             [FromQuery] string? Status,
@@ -28,9 +31,15 @@ namespace ApiUrbanPlanning.Controllers.Suggestions
             [FromQuery] string? DateTo,
             [FromQuery] string? GroupBy)
         {
+            var effectiveIbgeId = TenantIbgeResolver.ResolveEffectiveIbgeId(User, IbgeId);
+            if (TenantIbgeResolver.RequiresTenantIbge(User) && effectiveIbgeId == null)
+            {
+                return Forbid();
+            }
+
             var result = await _useCase.Execute(
                 Status ?? string.Empty,
-                IbgeId,
+                effectiveIbgeId,
                 DateFrom,
                 DateTo,
                 GroupBy ?? "month");

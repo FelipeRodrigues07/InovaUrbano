@@ -9,9 +9,32 @@ namespace apiUrbanPlanning.Infrastructure.Data.Seed
     {
         public static async Task RunAsync(InfrastructureDbContext context)
         {
+            await EnsureSuperAdminAsync(context);
             var municipality = await EnsureMunicipalityAsync(context);
-            await EnsureAdminAsync(context, municipality);
+            await EnsureMunicipalityAdminAsync(context, municipality);
             await context.SaveChangesAsync();
+        }
+
+        private static async Task EnsureSuperAdminAsync(InfrastructureDbContext context)
+        {
+            var normalizedEmail = MockSeedData.SuperAdmin.Email.Trim().ToLowerInvariant();
+
+            if (await context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail))
+            {
+                return;
+            }
+
+            var passwordHasher = new PasswordHasher<User>();
+            var user = new User
+            {
+                Name = MockSeedData.SuperAdmin.Name,
+                Email = normalizedEmail,
+                Role = MockSeedData.SuperAdmin.Role,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            user.Password = passwordHasher.HashPassword(user, MockSeedData.SuperAdmin.Password);
+            await context.Users.AddAsync(user);
         }
 
         private static async Task<Municipality> EnsureMunicipalityAsync(InfrastructureDbContext context)
@@ -42,7 +65,7 @@ namespace apiUrbanPlanning.Infrastructure.Data.Seed
             return municipality;
         }
 
-        private static async Task EnsureAdminAsync(InfrastructureDbContext context, Municipality municipality)
+        private static async Task EnsureMunicipalityAdminAsync(InfrastructureDbContext context, Municipality municipality)
         {
             var normalizedEmail = MockSeedData.Anapolis.Admin.Email.Trim().ToLowerInvariant();
 

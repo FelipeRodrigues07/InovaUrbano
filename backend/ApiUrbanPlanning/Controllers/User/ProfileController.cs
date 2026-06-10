@@ -1,3 +1,4 @@
+using apiUrbanPlanning.Response;
 using apiUrbanPlanning.UseCase.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace apiUrbanPlanning.Controllers.User
 
         [HttpGet("Profile")]
         [Authorize]
+        [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetProfile()
         {
             try
@@ -25,17 +27,8 @@ namespace apiUrbanPlanning.Controllers.User
                 // Extrai o token JWT do cabeçalho Authorization
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-                // Chama o caso de uso para buscar o perfil do usuário
-                var user = await _profileUseCase.Execute(token);
-
-                // Retorna os dados do perfil do usuário
-                return Ok(new
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    ProfilePictureUrl = user.ProfilePictureUrl
-                });
+                var profile = await _profileUseCase.Execute(token);
+                return Ok(profile);
             }
             catch (UnauthorizedAccessException ex)
             {

@@ -64,13 +64,16 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // Mantém os nomes curtos das claims do token ("role", "ibge_id", etc.)
+    options.MapInboundClaims = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false, // Configure se necess�rio
         ValidateAudience = false, // Configure se necess�rio
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        RoleClaimType = "role",
     };
 });
 
