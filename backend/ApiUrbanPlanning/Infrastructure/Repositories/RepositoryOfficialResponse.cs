@@ -42,8 +42,10 @@ namespace ApiUrbanPlanning.Infrastructure.Repositories
             if (!string.IsNullOrEmpty(status) && status != "Todas")
             {
                 query = query.Where(r =>
-                    _context.Suggestions.Any(s =>
-                        s.Id == r.SuggestionId && s.Status == status));
+                    r.StatusAtPublish == status
+                    || (r.StatusAtPublish == string.Empty
+                        && _context.Suggestions.Any(s =>
+                            s.Id == r.SuggestionId && s.Status == status)));
             }
 
             if (ibgeId.HasValue && ibgeId.Value > 0)

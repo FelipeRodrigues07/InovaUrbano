@@ -12,6 +12,7 @@ namespace apiUrbanPlanning.Infrastructure.Models
         public DateTime? ContractEndsAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
         public ICollection<User> Users { get; set; } = new List<User>();
     }

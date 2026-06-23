@@ -47,9 +47,12 @@ namespace ApiUrbanPlanning.UseCase.OfficialResponse
                     Id = response.Id,
                     Title = response.Title,
                     Description = response.Description,
-                    Status = suggestion?.Status ?? string.Empty,
+                    Status = !string.IsNullOrEmpty(response.StatusAtPublish)
+                        ? response.StatusAtPublish
+                        : suggestion?.Status ?? string.Empty,
+                    StatusAtPublish = response.StatusAtPublish,
                     UserId = response.UserId,
-                    PostImageUrl = response.PostImageUrl,
+                    ImageUrl = response.ImageUrl,
                     Number = response.Number,
                     NumberSuggestion = response.NumberSuggestion,
                     CreatedAt = response.CreatedAt,

@@ -1,8 +1,6 @@
 ﻿using apiUrbanPlanning.Infrastructure.Models;
 using apiUrbanPlanning.Infrastructure.Repositories;
-using apiUrbanPlanning.Infrastructure.Services;
 using apiUrbanPlanning.Requests;
-
 
 namespace apiUrbanPlanning.UseCase.Suggestions
 {
@@ -17,23 +15,23 @@ namespace apiUrbanPlanning.UseCase.Suggestions
 
         public async Task Execute(RequestSuggestion request, string imageUrl)
         {
+            if (request.IbgeId <= 0)
             {
-
-                var suggestion = new Suggestion
-                {
-                    Type = request.Type,
-                    Description = request.Description,
-                    Latitude = request.Latitude,
-                    Longitude = request.Longitude,
-                    UserId = request.UserId,
-                    IbgeId = request.IbgeId,
-                    SuggestionImageUrl = imageUrl,
-
-
-                };
-
-                await _repository.CreateSuggestion(suggestion);
+                throw new ArgumentException("IbgeId is required.");
             }
+
+            var suggestion = new Suggestion
+            {
+                Type = request.Type,
+                Description = request.Description,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                UserId = request.UserId,
+                IbgeId = request.IbgeId,
+                SuggestionImageUrl = imageUrl,
+            };
+
+            await _repository.CreateSuggestion(suggestion);
         }
     }
 }

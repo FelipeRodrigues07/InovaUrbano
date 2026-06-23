@@ -71,7 +71,6 @@ namespace apiUrbanPlanning.UseCase.Municipalities
                 municipality.Slug = slug;
             }
 
-            municipality.UpdatedAt = DateTime.UtcNow;
             await _repository.Update(municipality);
 
             return CreateMunicipalityUseCase.MapToResponse(municipality);

@@ -10,7 +10,7 @@ namespace apiUrbanPlanning.Requests
         public double Longitude { get; set; }
         public Guid UserId { get; set; }
         [FromForm(Name = "ibgeId")]
-        public int? IbgeId { get; set; } // Opcional para não quebrar clientes antigos
+        public int IbgeId { get; set; }
 
         [FromForm(Name = "file")]
         public IFormFile File { get; set; } //  Arquivo de imagem 

@@ -14,11 +14,16 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
             _context = context;
         }
 
-        public async  Task CreateSuggestion(Suggestion suggestion)
+        public async Task CreateSuggestion(Suggestion suggestion)
         {
-            await _context.Set<Suggestion>().AddAsync(suggestion);
-            await _context.SaveChangesAsync();
+            var maxNumber = await _context.Suggestions
+                .Where(s => s.IbgeId == suggestion.IbgeId)
+                .MaxAsync(s => (int?)s.Number) ?? 0;
 
+            suggestion.Number = maxNumber + 1;
+
+            await _context.Suggestions.AddAsync(suggestion);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Suggestion>> GetAllSuggestions(double latMin, double latMax, double lonMin, double lonMax, string Status)
@@ -62,7 +67,11 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
                 query = query.Where(s => s.Status == status);
             }
 
-            if (suggestionNumber > 0)
+            if (suggestionNumber > 0 && ibgeId.HasValue && ibgeId.Value > 0)
+            {
+                query = query.Where(s => s.Number == suggestionNumber && s.IbgeId == ibgeId.Value);
+            }
+            else if (suggestionNumber > 0)
             {
                 query = query.Where(s => s.Number == suggestionNumber);
             }
@@ -88,9 +97,10 @@ namespace apiUrbanPlanning.Infrastructure.Repositories
             return (items, total);
         }
 
-        public async Task<Suggestion?> GetSuggestionByNumber(int number)
+        public async Task<Suggestion?> GetSuggestionByNumberAndIbgeId(int number, int ibgeId)
         {
-            return await _context.Suggestions.FirstOrDefaultAsync(s => s.Number == number);
+            return await _context.Suggestions
+                .FirstOrDefaultAsync(s => s.Number == number && s.IbgeId == ibgeId);
         }
 
         public async Task<Suggestion> GetSuggestionById(Guid id)

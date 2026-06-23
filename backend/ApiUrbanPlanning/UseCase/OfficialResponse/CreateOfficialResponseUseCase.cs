@@ -20,7 +20,11 @@ namespace ApiUrbanPlanning.UseCase.OfficialResponse
             _repositorySuggestion = repositorySuggestion;
         }
 
-        public async Task Execute(RequestCreateOfficialResponse request, string imageUrl, string token)
+        public async Task Execute(
+            RequestCreateOfficialResponse request,
+            string imageUrl,
+            string token,
+            int ibgeId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(token);
@@ -36,10 +40,14 @@ namespace ApiUrbanPlanning.UseCase.OfficialResponse
                 throw new FormatException("Formato de ID de usuário inválido.");
             }
 
-            var existingSuggestion = await _repositorySuggestion.GetSuggestionByNumber(request.Number);
+            var existingSuggestion = await _repositorySuggestion.GetSuggestionByNumberAndIbgeId(
+                request.Number,
+                ibgeId);
+
             if (existingSuggestion == null)
             {
-                throw new InvalidOperationException($"No suggestion with the number {request.Number} exists.");
+                throw new InvalidOperationException(
+                    $"No suggestion with number {request.Number} exists for municipality {ibgeId}.");
             }
 
             existingSuggestion.Status = request.Status;
@@ -50,7 +58,8 @@ namespace ApiUrbanPlanning.UseCase.OfficialResponse
                 Title = request.Title,
                 Description = request.Description,
                 UserId = userId,
-                PostImageUrl = imageUrl,
+                ImageUrl = imageUrl,
+                StatusAtPublish = request.Status,
                 NumberSuggestion = request.Number,
                 SuggestionId = existingSuggestion.Id,
             };

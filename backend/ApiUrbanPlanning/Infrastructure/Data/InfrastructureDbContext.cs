@@ -6,55 +6,96 @@ namespace apiUrbanPlanning.Infrastructure.Data
 {
     public class InfrastructureDbContext : DbContext
     {
-
-        public InfrastructureDbContext(DbContextOptions<InfrastructureDbContext> options) : base(options) { 
+        public InfrastructureDbContext(DbContextOptions<InfrastructureDbContext> options) : base(options)
+        {
         }
 
+        public override int SaveChanges()
+        {
+            ApplyAuditTimestamps();
+            return base.SaveChanges();
+        }
 
-        public DbSet<User> Users { get; set; }  
-        public DbSet<Suggestion>  Suggestions { get; set; }
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ApplyAuditTimestamps();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void ApplyAuditTimestamps()
+        {
+            var now = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    var createdAt = entry.Properties.FirstOrDefault(p => p.Metadata.Name == nameof(User.CreatedAt));
+                    if (createdAt != null && createdAt.CurrentValue is DateTime created && created == default)
+                        createdAt.CurrentValue = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    var updatedAt = entry.Properties.FirstOrDefault(p => p.Metadata.Name == nameof(User.UpdatedAt));
+                    if (updatedAt != null)
+                        updatedAt.CurrentValue = now;
+                }
+            }
+        }
+
+        public DbSet<User> Users { get; set; }
+        public DbSet<Suggestion> Suggestions { get; set; }
         public DbSet<OfficialResponse> OfficialResponses { get; set; }
         public DbSet<Municipality> Municipalities { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configura a relação entre Suggestion e User
-            modelBuilder.Entity<Suggestion>()
-                .HasOne(s => s.User) // Define que Suggestion tem uma relação com User
-                .WithMany(u => u.Suggestions) // Define que User pode ter muitas sugestões
-                .HasForeignKey(s => s.UserId) // Define a chave estrangeira
-                .OnDelete(DeleteBehavior.Cascade); // Comportamento de deleção
+            modelBuilder.Entity<Suggestion>(entity =>
+            {
+                entity.HasOne(s => s.User)
+                    .WithMany(u => u.Suggestions)
+                    .HasForeignKey(s => s.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Suggestion>()
-           .Property(s => s.Number)
-           .ValueGeneratedOnAdd()
-            .UseIdentityColumn();
+                entity.HasIndex(s => new { s.IbgeId, s.Number })
+                    .IsUnique();
+            });
 
+            modelBuilder.Entity<OfficialResponse>(entity =>
+            {
+                entity.ToTable("OfficialResponses");
 
-            modelBuilder.Entity<OfficialResponse>()
-                .ToTable("Posts")
-                .Property(r => r.Number)
-                .ValueGeneratedOnAdd()
-                .UseIdentityColumn();
+                entity.Property(r => r.Number)
+                    .ValueGeneratedOnAdd()
+                    .UseIdentityColumn();
 
-            modelBuilder.Entity<Municipality>()
-                .ToTable("Municipalities")
-                .HasIndex(m => m.IbgeId)
-                .IsUnique();
+                entity.HasOne<Suggestion>()
+                    .WithMany()
+                    .HasForeignKey(r => r.SuggestionId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Municipality>()
-                .HasIndex(m => m.Slug)
-                .IsUnique();
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Municipality)
-                .WithMany(m => m.Users)
-                .HasForeignKey(u => u.MunicipalityId)
-                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Municipality>(entity =>
+            {
+                entity.ToTable("Municipalities");
+                entity.HasIndex(m => m.IbgeId).IsUnique();
+                entity.HasIndex(m => m.Slug).IsUnique();
+            });
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasIndex(u => u.Email).IsUnique();
+
+                entity.HasOne(u => u.Municipality)
+                    .WithMany(m => m.Users)
+                    .HasForeignKey(u => u.MunicipalityId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
         }
-
-
     }
 }

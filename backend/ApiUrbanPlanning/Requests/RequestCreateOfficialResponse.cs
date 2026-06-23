@@ -9,6 +9,9 @@ namespace ApiUrbanPlanning.Requests
         public string Status { get; set; } = string.Empty;
         public int Number { get; set; }
 
+        [FromForm(Name = "ibgeId")]
+        public int? IbgeId { get; set; }
+
         [FromForm(Name = "file")]
         public IFormFile File { get; set; } = null!;
     }
