@@ -81,7 +81,7 @@ const PublishOfficialResponse: React.FC = () => {
                 type="text"
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}
-                placeholder="Número da Sugestão"
+                placeholder="Número da solicitação"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>

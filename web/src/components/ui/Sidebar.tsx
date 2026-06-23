@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
           <Link to="/view-suggestions">
             <span className="inline-flex items-center gap-4 pl-4 h-12 py-0 rounded-r-full text-white w-full hover:bg-indigo-50 hover:text-black transition-all ease-in-out delay-100 duration-200">
               <BsChatText className="relative text-lg" />
-              <span className="max-md:opacity-0 max-md:hidden">Ver Sugestões</span>
+              <span className="max-md:opacity-0 max-md:hidden">Ver solicitações</span>
             </span>
           </Link>
 

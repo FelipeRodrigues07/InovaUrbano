@@ -130,7 +130,7 @@ const ViewSuggestions: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-5 text-center">
-      <h1 className="text-lg sm:text-xl font-bold mb-4">Visualizações de sugestões</h1>
+      <h1 className="text-lg sm:text-xl font-bold mb-4">Solicitações</h1>
 
       <div className="sticky top-16 z-40 -mx-4 sm:-mx-5 px-4 sm:px-5 py-2 mb-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex flex-wrap justify-center items-center gap-2">
@@ -141,7 +141,7 @@ const ViewSuggestions: React.FC = () => {
 
           <Input
             type="number"
-            placeholder="Nº sugestão"
+            placeholder="Nº solicitação"
             value={numberSuggestion ?? ''}
             onChange={(e) =>
               setNumberSuggestion(e.target.value ? Number(e.target.value) : undefined)
@@ -189,12 +189,12 @@ const ViewSuggestions: React.FC = () => {
         )}
         {isError && (
           <p className="col-span-full text-center text-red-500">
-            Erro ao carregar sugestões.
+            Erro ao carregar solicitações.
           </p>
         )}
         {suggestions.length === 0 && !isLoading && !isError && (
           <p className="col-span-full text-center text-gray-500">
-            Nenhuma sugestão encontrada.
+            Nenhuma solicitação encontrada.
           </p>
         )}
 
@@ -229,7 +229,7 @@ const ViewSuggestions: React.FC = () => {
 
             <img
               src={suggestion.suggestionImageUrl || 'https://via.placeholder.com/400x160'}
-              alt="Suggestion"
+              alt="Solicitação"
               className="w-full h-36 object-cover rounded-md mb-3"
             />
 

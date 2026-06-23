@@ -60,7 +60,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao enviar sugestão: $e')),
+        SnackBar(content: Text('Erro ao criar conta: $e')),
       );
     } finally {
       _createAccountController.isLoading = false;

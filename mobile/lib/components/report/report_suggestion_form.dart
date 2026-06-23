@@ -37,7 +37,7 @@ class ReportSuggestionForm extends StatelessWidget {
           DropdownButtonFormField<String>(
             value: selectedType,
             decoration: const InputDecoration(
-              labelText: 'Tipo de Sugestão',
+              labelText: 'Tipo de solicitação',
               border: OutlineInputBorder(),
             ),
             items: suggestionTypes.map((String type) {
@@ -132,7 +132,7 @@ class ReportSuggestionForm extends StatelessWidget {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text('Enviar Sugestão'),
+                    : const Text('Enviar solicitação'),
               );
             },
           ),

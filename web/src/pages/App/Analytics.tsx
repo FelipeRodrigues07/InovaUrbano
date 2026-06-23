@@ -79,7 +79,7 @@ function getTypeColor(type: string): string {
 
 const timeSeriesConfig = {
     count: {
-        label: 'Sugestões',
+        label: 'Solicitações',
         color: 'var(--primary)',
     },
 } satisfies ChartConfig;
@@ -195,7 +195,7 @@ export default function Analytics() {
 
     return (
         <div className="p-4 sm:p-5 text-center">
-            <h1 className="text-lg sm:text-xl font-bold mb-2">Análise de sugestões</h1>
+            <h1 className="text-lg sm:text-xl font-bold mb-2">Análise de solicitações</h1>
             <p className="text-sm text-muted-foreground mb-4">
                 Gráficos e indicadores com base nos filtros selecionados.
             </p>
@@ -334,7 +334,7 @@ export default function Analytics() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Por status</CardTitle>
-                        <CardDescription>Distribuição das sugestões filtradas</CardDescription>
+                        <CardDescription>Distribuição das solicitações filtradas</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {(data?.byStatus.length ?? 0) === 0 && !isLoading ? (

@@ -139,7 +139,7 @@ const ViewOfficialResponses: React.FC = () => {
 
           <Input
             type="number"
-            placeholder="Nº sugestão"
+            placeholder="Nº solicitação"
             value={numberSuggestion ?? ''}
             onChange={(e) =>
               setNumberSuggestion(e.target.value ? Number(e.target.value) : undefined)
@@ -233,7 +233,7 @@ const ViewOfficialResponses: React.FC = () => {
                 <span className="font-semibold text-gray-800">Motivo:</span> {response.title}
               </p>
               <p>
-                <span className="font-semibold text-gray-800">Nº sugestão:</span>{' '}
+                <span className="font-semibold text-gray-800">Nº solicitação:</span>{' '}
                 {response.numberSuggestion}
               </p>
             </div>

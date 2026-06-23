@@ -124,7 +124,7 @@ class _ConfigPageState extends State<ConfigPage> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.warning), label: 'Reclame'),
+          BottomNavigationBarItem(icon: Icon(Icons.warning), label: 'Solicitar'),
           BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Feed'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],

@@ -155,13 +155,18 @@ class _ReportScreenState extends State<ReportScreen> {
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) {
         _moveToLatLng(LatLng(last.latitude, last.longitude), zoom: 14);
+        if (silent) return;
       }
+
+      // On boot, avoid high-accuracy GPS — it often ANRs the emulator.
+      if (silent) return;
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 8),
         ),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       _moveToLatLng(LatLng(position.latitude, position.longitude), zoom: 14);
     } on TimeoutException {
@@ -281,7 +286,7 @@ class _ReportScreenState extends State<ReportScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Selecione uma cidade antes de enviar a sugestão.'),
+          content: Text('Selecione uma cidade antes de enviar a solicitação.'),
         ),
       );
       return;
@@ -310,17 +315,17 @@ class _ReportScreenState extends State<ReportScreen> {
 
       if (!_createSuggestionController.isError) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sugestão enviada com sucesso!')),
+          const SnackBar(content: Text('Solicitação enviada com sucesso!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao enviar sugestão.')),
+          const SnackBar(content: Text('Erro ao enviar solicitação.')),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao enviar sugestão: $e')),
+        SnackBar(content: Text('Erro ao enviar solicitação: $e')),
       );
     }
   }
@@ -466,7 +471,7 @@ class _ReportScreenState extends State<ReportScreen> {
         backgroundColor: Colors.blue,
         title: const Center(
           child: Text(
-            "Fazer reclamação ou sugestão",
+            "Registrar solicitação",
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
         ),

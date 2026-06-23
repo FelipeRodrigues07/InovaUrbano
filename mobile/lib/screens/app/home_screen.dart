@@ -183,13 +183,18 @@ class _HomePageState extends State<Home> {
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) {
         await _moveToLatLng(LatLng(last.latitude, last.longitude), zoom: 14);
+        if (silent) return;
       }
+
+      // On boot, avoid high-accuracy GPS — it often ANRs the emulator.
+      if (silent) return;
 
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 8),
         ),
-      ).timeout(const Duration(seconds: 10));
+      );
       await _moveToLatLng(LatLng(pos.latitude, pos.longitude), zoom: 14);
       await getSuggestions();
     } on TimeoutException {
@@ -397,7 +402,7 @@ class _HomePageState extends State<Home> {
           Align(
             alignment: Alignment.center,
             child: const Text(
-              'Selecione uma cidade para ver as sugestões',
+              'Selecione uma cidade para ver as solicitações',
               style: TextStyle(fontSize: 14),
               textAlign: TextAlign.center,
             ),
