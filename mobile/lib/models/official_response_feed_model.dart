@@ -1,4 +1,4 @@
-class GetAllPostsFeedModel {
+class OfficialResponseFeedModel {
   final String id;
   final String title;
   final String description;
@@ -12,7 +12,7 @@ class GetAllPostsFeedModel {
   final String suggestionType;
   final String suggestionStatus;
 
-  GetAllPostsFeedModel({
+  OfficialResponseFeedModel({
     required this.id,
     required this.title,
     required this.description,
@@ -27,8 +27,8 @@ class GetAllPostsFeedModel {
     required this.suggestionStatus,
   });
 
-  factory GetAllPostsFeedModel.fromJson(Map<String, dynamic> json) {
-    return GetAllPostsFeedModel(
+  factory OfficialResponseFeedModel.fromJson(Map<String, dynamic> json) {
+    return OfficialResponseFeedModel(
       id: json['id'],
       title: json['title'],
       description: json['description'],

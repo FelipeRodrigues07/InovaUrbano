@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createPostService } from '@/services/api/CreatePostService';
+import { createOfficialResponseService } from '@/services/api/CreateOfficialResponseService';
 import { useLocation } from 'react-router-dom';
 
-const PostingArea: React.FC = () => {
+const PublishOfficialResponse: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [numero, setNumero] = useState<string>('');
   const [titulo, setTitulo] = useState<string>('');
@@ -33,7 +33,7 @@ const PostingArea: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await createPostService({
+      await createOfficialResponseService({
         title: titulo,
         description: descricao,
         status: selectedStatus,
@@ -41,7 +41,7 @@ const PostingArea: React.FC = () => {
         file: imageFile,
       });
 
-      alert('Sugestão enviada com sucesso!');
+      alert('Resposta oficial publicada com sucesso!');
 
       setNumero('');
       setTitulo('');
@@ -70,7 +70,7 @@ const PostingArea: React.FC = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="w-full max-w-2xl">
         <h1 className="text-2xl font-bold text-center mb-8 text-gray-800">
-          Área de Postagem
+          Publicar resposta oficial
         </h1>
 
         <div className="bg-white rounded-lg shadow-md p-8">
@@ -173,4 +173,4 @@ const PostingArea: React.FC = () => {
   );
 };
 
-export default PostingArea;
+export default PublishOfficialResponse;

@@ -1,6 +1,6 @@
 import { api } from '@/services/api/api';
 
-interface CreatePostPayload {
+interface CreateOfficialResponsePayload {
   title: string;
   description: string;
   status: string;
@@ -8,7 +8,7 @@ interface CreatePostPayload {
   file?: File | null;
 }
 
-export const createPostService = async (data: CreatePostPayload) => {
+export const createOfficialResponseService = async (data: CreateOfficialResponsePayload) => {
   const formData = new FormData();
 
   formData.append('title', data.title);
@@ -20,13 +20,7 @@ export const createPostService = async (data: CreatePostPayload) => {
     formData.append('File', data.file);
   }
 
-  console.log("2. CONTEÚDO DO FORMDATA SENDO ENVIADO:");
-  formData.forEach((value, key) => {
-    console.log(`${key}:`, value);
-  });
-
-
-  const response = await api.post('/createPost', formData);
+  const response = await api.post('/official-responses', formData);
 
   return response.data;
 };

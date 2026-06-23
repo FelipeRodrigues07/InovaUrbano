@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { PostingService } from '@/services/api/PostingService';
-import type { PostingAdmModel, PaginationMeta } from '@/services/api/PostingService';
+import { OfficialResponseService } from '@/services/api/OfficialResponseService';
+import type { OfficialResponseAdmModel, PaginationMeta } from '@/services/api/OfficialResponseService';
 import { useCity } from '@/contexts/CityContext';
 import { CityFilter } from '@/components/ui/CityFilter';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -40,10 +40,10 @@ const statusBadgeClass: Record<string, string> = {
   Rejeitadas: 'bg-red-100 text-red-800',
 };
 
-const ViewPostings: React.FC = () => {
+const ViewOfficialResponses: React.FC = () => {
   const { cityId, citiesLoading, resetToDefaultCity, canSelectCity } = useCity();
 
-  const [postings, setPostings] = useState<PostingAdmModel[]>([]);
+  const [officialResponses, setOfficialResponses] = useState<OfficialResponseAdmModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [numberSuggestion, setNumberSuggestion] = useState<number | undefined>(undefined);
@@ -54,14 +54,14 @@ const ViewPostings: React.FC = () => {
 
   const hasMore = meta != null && meta.current_page < meta.last_page;
 
-  const fetchPostings = async (pageNumber: number, loadMore = false) => {
+  const fetchOfficialResponses = async (pageNumber: number, loadMore = false) => {
     if (!cityId) return;
 
     setIsLoading(true);
     setIsError(false);
 
     try {
-      const result = await PostingService.getPosting({
+      const result = await OfficialResponseService.getOfficialResponses({
         numberSuggestion,
         status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
         dateCalendar: selectedDate,
@@ -70,7 +70,7 @@ const ViewPostings: React.FC = () => {
         pageSize,
       });
 
-      setPostings(prev => (loadMore ? [...prev, ...result.data] : result.data));
+      setOfficialResponses(prev => (loadMore ? [...prev, ...result.data] : result.data));
       setMeta(result.meta);
     } catch {
       setIsError(true);
@@ -89,7 +89,7 @@ const ViewPostings: React.FC = () => {
       setIsError(false);
 
       try {
-        const result = await PostingService.getPosting({
+        const result = await OfficialResponseService.getOfficialResponses({
           numberSuggestion,
           status: selectedType === '' || selectedType === 'Todas' ? '' : selectedType,
           dateCalendar: selectedDate,
@@ -99,7 +99,7 @@ const ViewPostings: React.FC = () => {
         });
 
         if (!cancelled) {
-          setPostings(result.data);
+          setOfficialResponses(result.data);
           setMeta(result.meta);
         }
       } catch {
@@ -114,9 +114,9 @@ const ViewPostings: React.FC = () => {
     };
   }, [selectedType, numberSuggestion, selectedDate, cityId, citiesLoading]);
 
-  const loadMorePostings = () => {
+  const loadMoreOfficialResponses = () => {
     if (!hasMore || isLoading) return;
-    fetchPostings((meta?.current_page ?? 0) + 1, true);
+    fetchOfficialResponses((meta?.current_page ?? 0) + 1, true);
   };
 
   const handleClearFilters = () => {
@@ -128,7 +128,7 @@ const ViewPostings: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-5 text-center">
-      <h1 className="text-lg sm:text-xl font-bold mb-4">Visualizações de postagens</h1>
+      <h1 className="text-lg sm:text-xl font-bold mb-4">Respostas oficiais</h1>
 
       <div className="sticky top-16 z-40 -mx-4 sm:-mx-5 px-4 sm:px-5 py-2 mb-4 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex flex-wrap justify-center items-center gap-2">
@@ -173,68 +173,68 @@ const ViewPostings: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-2 sm:px-4">
-        {isLoading && postings.length === 0 && (
+        {isLoading && officialResponses.length === 0 && (
           <p className="col-span-full text-center text-lg">Carregando...</p>
         )}
         {isError && (
           <p className="col-span-full text-center text-red-500">
-            Erro ao carregar postagens.
+            Erro ao carregar respostas oficiais.
           </p>
         )}
-        {postings.length === 0 && !isLoading && !isError && (
+        {officialResponses.length === 0 && !isLoading && !isError && (
           <p className="col-span-full text-center text-gray-500">
-            Nenhuma postagem encontrada.
+            Nenhuma resposta oficial encontrada.
           </p>
         )}
 
-        {postings.map((posting) => (
+        {officialResponses.map((response) => (
           <div
-            key={posting.id}
+            key={response.id}
             className="suggestion-card flex flex-col p-4 bg-white rounded-lg border border-gray-100 shadow-sm text-left"
           >
             <div className="flex items-start justify-between gap-2 mb-2 min-h-[2rem]">
               <div className="flex items-center min-w-0">
                 <img
-                  src={posting.profilePictureUrl || 'https://via.placeholder.com/32'}
+                  src={response.profilePictureUrl || 'https://via.placeholder.com/32'}
                   alt="Profile"
                   className="w-8 h-8 rounded-full mr-2 object-cover shrink-0"
                 />
                 <span className="text-sm font-semibold text-gray-800 truncate">
-                  {posting.userName}
+                  {response.userName}
                 </span>
               </div>
-              {posting.status && (
+              {response.status && (
                 <span
                   className={`shrink-0 text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap ${
-                    statusBadgeClass[posting.status] ?? 'bg-gray-100 text-gray-700'
+                    statusBadgeClass[response.status] ?? 'bg-gray-100 text-gray-700'
                   }`}
                 >
-                  {posting.status}
+                  {response.status}
                 </span>
               )}
             </div>
 
             <span className="text-sm text-gray-500 mb-3">
-              {formatToBrazilianDate(posting.createdAt)}
+              {formatToBrazilianDate(response.createdAt)}
             </span>
 
             <img
-              src={posting.postImageUrl || 'https://via.placeholder.com/400x160'}
-              alt="Postagem"
+              src={response.postImageUrl || 'https://via.placeholder.com/400x160'}
+              alt="Resposta oficial"
               className="w-full h-36 object-cover rounded-md mb-3"
             />
 
             <p className="text-sm text-gray-700 mb-3 line-clamp-3 leading-relaxed">
-              {posting.description}
+              {response.description}
             </p>
 
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <span className="font-semibold text-gray-800">Motivo:</span> {posting.title}
+                <span className="font-semibold text-gray-800">Motivo:</span> {response.title}
               </p>
               <p>
                 <span className="font-semibold text-gray-800">Nº sugestão:</span>{' '}
-                {posting.numberSuggestion}
+                {response.numberSuggestion}
               </p>
             </div>
           </div>
@@ -247,7 +247,7 @@ const ViewPostings: React.FC = () => {
             <p className="text-center text-gray-500">Carregando mais...</p>
           ) : (
             <button
-              onClick={loadMorePostings}
+              onClick={loadMoreOfficialResponses}
               className="px-5 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-700 transition"
             >
               Carregar Mais
@@ -259,4 +259,4 @@ const ViewPostings: React.FC = () => {
   );
 };
 
-export default ViewPostings;
+export default ViewOfficialResponses;

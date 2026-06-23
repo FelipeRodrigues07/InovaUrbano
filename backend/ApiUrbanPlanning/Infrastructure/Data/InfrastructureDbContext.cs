@@ -13,7 +13,7 @@ namespace apiUrbanPlanning.Infrastructure.Data
 
         public DbSet<User> Users { get; set; }  
         public DbSet<Suggestion>  Suggestions { get; set; }
-        public DbSet<Post> Posts { get; set; }
+        public DbSet<OfficialResponse> OfficialResponses { get; set; }
         public DbSet<Municipality> Municipalities { get; set; }
 
 
@@ -32,9 +32,9 @@ namespace apiUrbanPlanning.Infrastructure.Data
             .UseIdentityColumn();
 
 
-            modelBuilder.Entity<Post>()
+            modelBuilder.Entity<OfficialResponse>()
                 .ToTable("Posts")
-                .Property(s => s.Number)
+                .Property(r => r.Number)
                 .ValueGeneratedOnAdd()
                 .UseIdentityColumn();
 

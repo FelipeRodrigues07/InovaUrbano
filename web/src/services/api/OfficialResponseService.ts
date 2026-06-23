@@ -3,7 +3,7 @@ import type { PaginatedResponse, PaginationMeta } from '@/services/api/Suggestio
 
 export type { PaginatedResponse, PaginationMeta };
 
-export interface GetPostingParams {
+export interface GetOfficialResponseParams {
     numberSuggestion?: number;
     status?: string;
     dateCalendar?: string;
@@ -12,7 +12,7 @@ export interface GetPostingParams {
     pageSize?: number;
 }
 
-export interface PostingAdmModel {
+export interface OfficialResponseAdmModel {
     id: string;
     userId: string;
     userName: string;
@@ -26,15 +26,15 @@ export interface PostingAdmModel {
     numberSuggestion: number;
 }
 
-export const PostingService = {
-    getPosting: async ({
+export const OfficialResponseService = {
+    getOfficialResponses: async ({
         numberSuggestion = 0,
         status = '',
         dateCalendar = '',
         ibgeId,
         pageNumber = 1,
         pageSize = 10,
-    }: GetPostingParams): Promise<PaginatedResponse<PostingAdmModel>> => {
+    }: GetOfficialResponseParams): Promise<PaginatedResponse<OfficialResponseAdmModel>> => {
         try {
             const params: Record<string, string | number> = {
                 NumberSuggestion: numberSuggestion,
@@ -48,7 +48,7 @@ export const PostingService = {
                 params.IbgeId = ibgeId;
             }
 
-            const response = await api.get<PaginatedResponse<PostingAdmModel>>('/posts/adm', {
+            const response = await api.get<PaginatedResponse<OfficialResponseAdmModel>>('/official-responses/adm', {
                 params,
             });
             return response.data;

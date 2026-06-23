@@ -248,7 +248,7 @@ const ViewSuggestions: React.FC = () => {
 
             <button
               onClick={() => {
-                navigate('/posting-area', { state: { suggestionNumber: suggestion.number } });
+                navigate('/official-responses/publish', { state: { suggestionNumber: suggestion.number } });
               }}
               className="mt-auto w-full py-2 text-sm bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition"
             >

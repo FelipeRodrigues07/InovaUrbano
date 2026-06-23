@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:planejamento_urbano/config/api_constants.dart';
-import 'package:planejamento_urbano/models/get_all_post_feed_model.dart';
+import 'package:planejamento_urbano/models/official_response_feed_model.dart';
 import 'package:planejamento_urbano/storage/storage_city_prefs.dart';
 import 'dart:convert';
 
-class GetAllPostsFeedController extends ChangeNotifier {
+class OfficialResponsesFeedController extends ChangeNotifier {
   bool isLoading = false;
   bool isError = false;
   bool noCitySelected = false;
   int pageNumber = 1;
   final int pageSize = 5;
-  List<GetAllPostsFeedModel> posts = [];
+  List<OfficialResponseFeedModel> officialResponses = [];
   String? cityLabel;
   int? _ibgeId;
   int _requestId = 0;
 
-  /// Números das sugestões do município (fallback quando a API de posts ignora ibgeId).
   Future<Set<int>> _fetchSuggestionNumbersForIbge(int ibgeId) async {
     final uri = Uri.parse('$baseUrl/suggestions/feed').replace(
       queryParameters: {
@@ -43,27 +42,26 @@ class GetAllPostsFeedController extends ChangeNotifier {
     return numbers;
   }
 
-  Future<List<GetAllPostsFeedModel>> _filterPostsForCity(
-    List<GetAllPostsFeedModel> raw,
+  Future<List<OfficialResponseFeedModel>> _filterForCity(
+    List<OfficialResponseFeedModel> raw,
     int cityIbgeId,
   ) async {
     if (raw.isEmpty) return raw;
 
-    final hasIbgeField = raw.any((p) => p.suggestionIbgeId != null);
+    final hasIbgeField = raw.any((r) => r.suggestionIbgeId != null);
     if (hasIbgeField) {
-      return raw.where((p) => p.suggestionIbgeId == cityIbgeId).toList();
+      return raw.where((r) => r.suggestionIbgeId == cityIbgeId).toList();
     }
 
-    // API de posts antiga: filtra pelos números das sugestões da cidade.
     final allowed = await _fetchSuggestionNumbersForIbge(cityIbgeId);
     return raw
-        .where((p) => allowed.contains(p.numberSuggestion))
+        .where((r) => allowed.contains(r.numberSuggestion))
         .toList();
   }
 
-  Future<void> getPosts({bool loadMore = false}) async {
+  Future<void> loadOfficialResponses({bool loadMore = false}) async {
     if (loadMore) {
-      if (isLoading || _ibgeId == null || posts.isEmpty) return;
+      if (isLoading || _ibgeId == null || officialResponses.isEmpty) return;
     }
 
     final requestId = ++_requestId;
@@ -79,7 +77,7 @@ class GetAllPostsFeedController extends ChangeNotifier {
       if (noCitySelected) {
         _ibgeId = null;
         pageNumber = 1;
-        posts = [];
+        officialResponses = [];
         isLoading = false;
         isError = false;
         notifyListeners();
@@ -88,7 +86,7 @@ class GetAllPostsFeedController extends ChangeNotifier {
 
       _ibgeId = newIbgeId;
       pageNumber = 1;
-      posts = [];
+      officialResponses = [];
       notifyListeners();
     }
 
@@ -102,7 +100,7 @@ class GetAllPostsFeedController extends ChangeNotifier {
     final cityIbgeId = _ibgeId!;
 
     try {
-      final uri = Uri.parse('$baseUrl/posts/feed').replace(
+      final uri = Uri.parse('$baseUrl/official-responses/feed').replace(
         queryParameters: {
           'pageNumber': '$pageToFetch',
           'pageSize': '$pageSize',
@@ -115,16 +113,17 @@ class GetAllPostsFeedController extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        var newPosts =
-            data.map((json) => GetAllPostsFeedModel.fromJson(json)).toList();
+        var items = data
+            .map((json) => OfficialResponseFeedModel.fromJson(json))
+            .toList();
 
-        newPosts = await _filterPostsForCity(newPosts, cityIbgeId);
+        items = await _filterForCity(items, cityIbgeId);
         if (requestId != _requestId) return;
 
         if (loadMore) {
-          posts.addAll(newPosts);
+          officialResponses.addAll(items);
         } else {
-          posts = newPosts;
+          officialResponses = items;
         }
         pageNumber = pageToFetch + 1;
         isError = false;

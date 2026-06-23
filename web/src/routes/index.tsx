@@ -7,8 +7,8 @@ import SignIn from '@/pages/Auth/SignIn';
 
 import ProtectedRoute from '@/routes/ProtectedRoutes';
 import ViewSuggestions from '@/pages/App/ViewSuggestions';
-import ViewPostings from '@/pages/App/ViewPosting';
-import PostingArea from '@/pages/App/PostingArea';
+import ViewOfficialResponses from '@/pages/App/ViewOfficialResponses';
+import PublishOfficialResponse from '@/pages/App/PublishOfficialResponse';
 import SuggestionsMapPage from '@/pages/App/Dashboard';
 import Analytics from '@/pages/App/Analytics';
 import Profile from '@/pages/App/Profile';
@@ -27,9 +27,9 @@ export const AppRoutes: React.FC = () => {
             <Route path="/dashboard" element={<SuggestionsMapPage />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/view-suggestions" element={<ViewSuggestions />} />
-            <Route path="/view-postings" element={<ViewPostings />} />
+            <Route path="/official-responses" element={<ViewOfficialResponses />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/posting-area" element={<PostingArea />} />
+            <Route path="/official-responses/publish" element={<PublishOfficialResponse />} />
           </Route>
         </Route>
       </Routes>

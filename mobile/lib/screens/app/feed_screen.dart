@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:planejamento_urbano/controllers/get_all_posts_feed_controller.dart';
-import 'package:planejamento_urbano/models/get_all_post_feed_model.dart';
+import 'package:planejamento_urbano/controllers/official_responses_feed_controller.dart';
+import 'package:planejamento_urbano/models/official_response_feed_model.dart';
 import 'package:planejamento_urbano/controllers/get_all_suggestions_feed_controller.dart';
 import 'package:planejamento_urbano/storage/storage_city_prefs.dart';
 import 'package:provider/provider.dart';
@@ -16,20 +16,20 @@ class Feed extends StatefulWidget {
 class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
 
   late GetAllSuggestionsFeedController getAllSuggestionFeedController;
-  late GetAllPostsFeedController getAllPostsFeedController;
+  late OfficialResponsesFeedController officialResponsesFeedController;
   final ScrollController _suggestionsScrollController = ScrollController();
-  final ScrollController _postsScrollController = ScrollController();
+  final ScrollController _officialResponsesScrollController = ScrollController();
   late TabController _tabController;
   bool isActiveTab = true;
   String? _headerCityLabel;
   bool _headerNoCity = true;
 
-  /// Recarrega sugestões e postagens com a última cidade salva.
+  /// Recarrega sugestões e respostas oficiais com a última cidade salva.
   Future<void> reloadFromPrefs() async {
     await _syncHeaderFromPrefs();
     await Future.wait([
       getAllSuggestionFeedController.getSuggestions(),
-      getAllPostsFeedController.getPosts(),
+      officialResponsesFeedController.loadOfficialResponses(),
     ]);
   }
 
@@ -54,7 +54,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
           'Selecione uma cidade na tela Início para ver as sugestões do município.';
       icon = Icons.info_outline;
     } else if (cityLabel != null) {
-      message = 'Sugestões e postagens de: $cityLabel';
+      message = 'Sugestões e respostas oficiais de: $cityLabel';
       icon = Icons.location_on_outlined;
     } else {
       message = 'Carregando informações da cidade...';
@@ -149,14 +149,14 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     getAllSuggestionFeedController = GetAllSuggestionsFeedController();
-    getAllPostsFeedController = GetAllPostsFeedController();
+    officialResponsesFeedController = OfficialResponsesFeedController();
 
     Future.microtask(reloadFromPrefs);
 
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_onTabChanged);
     _suggestionsScrollController.addListener(_scrollListener);
-    _postsScrollController.addListener(_scrollListener);
+    _officialResponsesScrollController.addListener(_scrollListener);
   }
 
   @override
@@ -164,7 +164,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _suggestionsScrollController.dispose();
-    _postsScrollController.dispose();
+    _officialResponsesScrollController.dispose();
     super.dispose();
   }
 
@@ -180,13 +180,13 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
     if (index == 0) {
       getAllSuggestionFeedController.getSuggestions();
     } else {
-      getAllPostsFeedController.getPosts();
+      officialResponsesFeedController.loadOfficialResponses();
     }
   }
 
   void _scrollListener() {
     final controller =
-        isActiveTab ? _suggestionsScrollController : _postsScrollController;
+        isActiveTab ? _suggestionsScrollController : _officialResponsesScrollController;
     if (!controller.hasClients) return;
     final pos = controller.position;
     if (pos.maxScrollExtent <= 0) return;
@@ -195,15 +195,15 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
     if (isActiveTab) {
       getAllSuggestionFeedController.getSuggestions(loadMore: true);
     } else {
-      getAllPostsFeedController.getPosts(loadMore: true);
+      officialResponsesFeedController.loadOfficialResponses(loadMore: true);
     }
   }
 
-  Widget _suggestionLinkChip(GetAllPostsFeedModel post) {
+  Widget _suggestionLinkChip(OfficialResponseFeedModel response) {
     final parts = <String>[
-      if (post.numberSuggestion > 0) 'Sugestão #${post.numberSuggestion}',
-      if (post.suggestionType.isNotEmpty) post.suggestionType,
-      if (post.suggestionStatus.isNotEmpty) post.suggestionStatus,
+      if (response.numberSuggestion > 0) 'Sugestão #${response.numberSuggestion}',
+      if (response.suggestionType.isNotEmpty) response.suggestionType,
+      if (response.suggestionStatus.isNotEmpty) response.suggestionStatus,
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
 
@@ -245,7 +245,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: getAllSuggestionFeedController),
-        ChangeNotifierProvider.value(value: getAllPostsFeedController),
+        ChangeNotifierProvider.value(value: officialResponsesFeedController),
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -270,7 +270,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                       unselectedLabelStyle: const TextStyle(fontSize: 13),
                       tabs: const <Widget>[
                         Tab(text: 'Todas as Sugestões'),
-                        Tab(text: 'Postagens'),
+                        Tab(text: 'Respostas oficiais'),
                       ],
                       indicatorColor: Colors.white,
                       labelColor: Colors.white,
@@ -461,17 +461,17 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
             ),
 
             // Aba de postagens (vinculadas às sugestões da cidade)
-            Consumer<GetAllPostsFeedController>(
+            Consumer<OfficialResponsesFeedController>(
               builder: (context, controller, child) {
                 final cityLabel =
                     controller.cityLabel ?? _headerCityLabel;
                 final noCity =
                     controller.noCitySelected && _headerNoCity;
 
-                if (controller.isLoading && controller.posts.isEmpty) {
+                if (controller.isLoading && controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.hourglass_empty,
-                    title: 'Carregando postagens...',
+                    title: 'Carregando respostas oficiais...',
                     subtitle: cityLabel != null
                         ? 'Respostas da prefeitura em $cityLabel'
                         : null,
@@ -483,43 +483,43 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                     icon: Icons.location_city_outlined,
                     title: 'Nenhuma cidade selecionada',
                     subtitle:
-                        'Selecione o município na tela Início para ver as postagens ligadas às sugestões locais.',
+                        'Selecione o município na tela Início para ver as respostas oficiais ligadas às sugestões locais.',
                   );
                 }
 
-                if (controller.isError && controller.posts.isEmpty) {
+                if (controller.isError && controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.cloud_off_outlined,
-                    title: 'Não foi possível carregar as postagens',
+                    title: 'Não foi possível carregar as respostas oficiais',
                     subtitle:
                         'Confira se a API está rodando e o IP em api_constants.dart.',
                     action: _blueActionButton(
                       label: 'Tentar novamente',
-                      onPressed: () => controller.getPosts(),
+                      onPressed: () => controller.loadOfficialResponses(),
                     ),
                   );
                 }
 
-                if (controller.posts.isEmpty) {
+                if (controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.campaign_outlined,
-                    title: 'Não há postagens para esta cidade',
+                    title: 'Não há respostas oficiais para esta cidade',
                     subtitle: cityLabel != null
                         ? 'Ainda não há respostas oficiais vinculadas a sugestões de $cityLabel.'
-                        : 'As postagens aparecem quando a administração responde a uma sugestão.',
+                        : 'As respostas oficiais aparecem quando a administração responde a uma sugestão.',
                     action: _blueActionButton(
                       label: 'Atualizar',
-                      onPressed: () => controller.getPosts(),
+                      onPressed: () => controller.loadOfficialResponses(),
                     ),
                   );
                 }
 
                 return ListView.builder(
-                        controller: _postsScrollController,
+                        controller: _officialResponsesScrollController,
                         padding: const EdgeInsets.all(10.0),
-                        itemCount: controller.posts.length + 1,
+                        itemCount: controller.officialResponses.length + 1,
                         itemBuilder: (context, index) {
-                          if (index == controller.posts.length) {
+                          if (index == controller.officialResponses.length) {
                             return controller.isLoading
                                 ? const Padding(
                                     padding:
@@ -530,7 +530,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                 : const SizedBox.shrink();
                           }
 
-                          final post = controller.posts[index];
+                          final response = controller.officialResponses[index];
 
                           return Column(
                             children: [
@@ -543,19 +543,19 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _suggestionLinkChip(post),
+                                    _suggestionLinkChip(response),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Row(
                                         children: [
-                                          post.profilePictureUrl.isNotEmpty
+                                          response.profilePictureUrl.isNotEmpty
                                               ? CircleAvatar(
                                                   radius: 20,
                                                   backgroundColor:
                                                       Colors.grey[300],
                                                   child: ClipOval(
                                                     child: CachedNetworkImage(
-                                                      imageUrl: post
+                                                      imageUrl: response
                                                           .profilePictureUrl,
                                                       fit: BoxFit.cover,
                                                       width: 40,
@@ -584,7 +584,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                                 ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            post.userName,
+                                            response.userName,
                                             style: const TextStyle(
                                               color: Colors.black87,
                                               fontSize: 16,
@@ -593,9 +593,9 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                         ],
                                       ),
                                     ),
-                                    post.postImageUrl.isNotEmpty == true
+                                    response.postImageUrl.isNotEmpty == true
                                         ? CachedNetworkImage(
-                                            imageUrl: post.postImageUrl,
+                                            imageUrl: response.postImageUrl,
                                             height: 200,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
@@ -609,7 +609,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 8.0),
                                       child: Text(
-                                        post.title,
+                                        response.title,
                                         style: const TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
@@ -619,7 +619,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        post.description,
+                                        response.description,
                                         style: const TextStyle(fontSize: 16),
                                       ),
                                     ),

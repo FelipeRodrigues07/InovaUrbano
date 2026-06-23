@@ -47,17 +47,17 @@ const Sidebar: React.FC = () => {
             </span>
           </Link>
 
-          <Link to="/posting-area">
+          <Link to="/official-responses/publish">
             <span className="inline-flex items-center gap-4 pl-4 h-12 py-0 rounded-r-full text-white w-full hover:bg-indigo-50 hover:text-black  transition-all ease-in-out delay-100 duration-200">
               <BsPencilSquare className="relative text-lg" />
-              <span className="max-md:opacity-0 max-md:hidden">  Postagens </span>
+              <span className="max-md:opacity-0 max-md:hidden">Publicar resposta</span>
             </span>
           </Link>
 
-          <Link to="/view-postings">
+          <Link to="/official-responses">
             <span className="inline-flex items-center gap-4 pl-4 h-12 py-0 rounded-r-full w-full text-white hover:bg-indigo-50 hover:text-black  transition-all ease-in-out delay-100 duration-200">
               <BsFiles className="relative text-lg" />
-              <span className="max-md:opacity-0 max-md:hidden">Ver Postagens </span>
+              <span className="max-md:opacity-0 max-md:hidden">Ver respostas oficiais</span>
             </span>
           </Link>
 

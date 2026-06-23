@@ -22,7 +22,7 @@ namespace apiUrbanPlanning.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ApiUrbanPlanning.Infrastructure.Models.Post", b =>
+            modelBuilder.Entity("ApiUrbanPlanning.Infrastructure.Models.OfficialResponse", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

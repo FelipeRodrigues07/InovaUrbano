@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http.Features;
 using ApiUrbanPlanning.UseCase.Users;
 using ApiUrbanPlanning.UseCase.Suggestions;
 using ApiUrbanPlanning.Infrastructure.Repositories;
-using ApiUrbanPlanning.UseCase.Post;
+using ApiUrbanPlanning.UseCase.OfficialResponse;
 using apiUrbanPlanning.UseCase.Municipalities;
 using apiUrbanPlanning.Infrastructure.Data.Seed;
 
@@ -28,7 +28,7 @@ builder.Services.AddDbContext<InfrastructureDbContext>(options =>
 builder.Services.AddScoped<InterfaceUser, RepositoryUser>();
 builder.Services.AddScoped<CreateAccountUseCase>();
 builder.Services.AddScoped<InterfaceSuggestion, RepositorySuggestion>();
-builder.Services.AddScoped<InterfacePost, RepositoryPost>();
+builder.Services.AddScoped<InterfaceOfficialResponse, RepositoryOfficialResponse>();
 builder.Services.AddScoped<InterfaceMunicipality, RepositoryMunicipality>();
 builder.Services.AddScoped<CreateMunicipalityUseCase>();
 builder.Services.AddScoped<UpdateMunicipalityUseCase>();
@@ -46,9 +46,9 @@ builder.Services.AddScoped<UpdateEmailUseCase>();
 builder.Services.AddScoped<UpdateNameUseCase>();
 builder.Services.AddScoped<GetAllSuggestionsAdmUseCase>();
 builder.Services.AddScoped<GetSuggestionsAnalyticsUseCase>();
-builder.Services.AddScoped<CreatePostUseCase>();
-builder.Services.AddScoped<GetAllPostAdmUseCase>();
-builder.Services.AddScoped<GetAllPostsFeedUseCase>();
+builder.Services.AddScoped<CreateOfficialResponseUseCase>();
+builder.Services.AddScoped<GetAllOfficialResponsesAdmUseCase>();
+builder.Services.AddScoped<GetAllOfficialResponsesFeedUseCase>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<CloudinaryService>();

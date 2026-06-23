@@ -1,50 +1,42 @@
 using apiUrbanPlanning.Infrastructure.Services;
-using apiUrbanPlanning.Requests;
-using apiUrbanPlanning.UseCase.Suggestions;
 using ApiUrbanPlanning.Requests;
-using ApiUrbanPlanning.UseCase.Post;
+using ApiUrbanPlanning.UseCase.OfficialResponse;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiUrbanPlanning.Controllers.Post
+namespace ApiUrbanPlanning.Controllers.OfficialResponse
 {
     [ApiController]
     [Route("api")]
-    [Tags("Posts")]
-    public class CreatePostController : ControllerBase
+    [Tags("OfficialResponses")]
+    public class CreateOfficialResponseController : ControllerBase
     {
-        private readonly CreatePostUseCase _createPostUseCase;
+        private readonly CreateOfficialResponseUseCase _createOfficialResponseUseCase;
         private readonly CloudinaryService _cloudinaryService;
 
-        public CreatePostController(CreatePostUseCase createPostUseCase, CloudinaryService cloudinaryService)
+        public CreateOfficialResponseController(
+            CreateOfficialResponseUseCase createOfficialResponseUseCase,
+            CloudinaryService cloudinaryService)
         {
-            _createPostUseCase = createPostUseCase;
+            _createOfficialResponseUseCase = createOfficialResponseUseCase;
             _cloudinaryService = cloudinaryService;
-
         }
 
-        [HttpPost("createPost")]
+        [HttpPost("official-responses")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateSuggestion([FromForm] RequestCreatePost request)
+        public async Task<IActionResult> CreateOfficialResponse([FromForm] RequestCreateOfficialResponse request)
         {
-
             try
             {
                 var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                string imageUrl = string.Empty;
+                var imageUrl = string.Empty;
 
                 if (request.File != null && request.File.Length > 0)
                 {
                     imageUrl = await _cloudinaryService.UploadImageAsync(request.File, "post_images");
                 }
 
-                await _createPostUseCase.Execute(new RequestCreatePost
-                {
-                    Title = request.Title,
-                    Description = request.Description,
-                    Status = request.Status,
-                    Number = request.Number,
-                }, imageUrl, token);
+                await _createOfficialResponseUseCase.Execute(request, imageUrl, token);
 
                 return StatusCode(201);
             }
