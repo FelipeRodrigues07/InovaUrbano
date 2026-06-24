@@ -250,27 +250,6 @@ class _ReportScreenState extends State<ReportScreen> {
       return;
     }
 
-    var userId = authProvider.userProfile?.id;
-    if (userId == null || userId.isEmpty) {
-      try {
-        await authProvider.fetchProfile();
-        userId = authProvider.userProfile?.id;
-      } catch (_) {
-        userId = null;
-      }
-    }
-    if (userId == null || userId.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Não foi possível identificar o usuário. Faça login novamente.',
-          ),
-        ),
-      );
-      return;
-    }
-
     if (_selectedType == null || _descriptionController.text.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -298,7 +277,6 @@ class _ReportScreenState extends State<ReportScreen> {
       latitude: _selectedLocation.latitude,
       longitude: _selectedLocation.longitude,
       ibgeId: ibgeId,
-      userId: userId,
     );
 
     try {

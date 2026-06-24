@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createOfficialResponseService } from '@/services/api/CreateOfficialResponseService';
 import { useLocation } from 'react-router-dom';
+import { useCity } from '@/contexts/CityContext';
 
 const PublishOfficialResponse: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('');
@@ -12,6 +13,7 @@ const PublishOfficialResponse: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const location = useLocation();
+  const { cityId } = useCity();
 
   useEffect(() => {
     if (location.state && location.state.suggestionNumber) {
@@ -38,6 +40,7 @@ const PublishOfficialResponse: React.FC = () => {
         description: descricao,
         status: selectedStatus,
         number: numero,
+        ibgeId: cityId ? parseInt(cityId, 10) : undefined,
         file: imageFile,
       });
 

@@ -8,7 +8,6 @@ namespace apiUrbanPlanning.Requests
         public string Description { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public Guid UserId { get; set; }
         [FromForm(Name = "ibgeId")]
         public int IbgeId { get; set; }
 

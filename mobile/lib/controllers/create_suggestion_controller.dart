@@ -30,7 +30,6 @@ class CreateSuggestionController extends ChangeNotifier {
       request.fields['latitude'] = suggestion.latitude.toString().replaceAll('.', ',');
       request.fields['longitude'] = suggestion.longitude.toString().replaceAll('.', ',');
       request.fields['ibgeId'] = suggestion.ibgeId.toString();
-      request.fields['userId'] = suggestion.userId;
 
       // Adiciona o arquivo de imagem se ele existir
       if (imageFile != null) {

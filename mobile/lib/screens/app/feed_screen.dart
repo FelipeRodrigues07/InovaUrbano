@@ -200,10 +200,13 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
   }
 
   Widget _suggestionLinkChip(OfficialResponseFeedModel response) {
+    final publishedStatus = response.statusAtPublish.isNotEmpty
+        ? response.statusAtPublish
+        : response.suggestionStatus;
     final parts = <String>[
       if (response.numberSuggestion > 0) 'Solicitação #${response.numberSuggestion}',
       if (response.suggestionType.isNotEmpty) response.suggestionType,
-      if (response.suggestionStatus.isNotEmpty) response.suggestionStatus,
+      if (publishedStatus.isNotEmpty) publishedStatus,
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
 
@@ -593,9 +596,9 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                                         ],
                                       ),
                                     ),
-                                    response.postImageUrl.isNotEmpty == true
+                                    response.imageUrl.isNotEmpty == true
                                         ? CachedNetworkImage(
-                                            imageUrl: response.postImageUrl,
+                                            imageUrl: response.imageUrl,
                                             height: 200,
                                             width: double.infinity,
                                             fit: BoxFit.cover,

@@ -18,10 +18,11 @@ export interface OfficialResponseAdmModel {
     userName: string;
     profilePictureUrl: string;
     createdAt: string;
-    postImageUrl?: string;
+    imageUrl?: string;
     description: string;
     title: string;
     status: string;
+    statusAtPublish?: string;
     number: number;
     numberSuggestion: number;
 }

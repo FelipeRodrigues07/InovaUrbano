@@ -219,7 +219,7 @@ const ViewOfficialResponses: React.FC = () => {
             </span>
 
             <img
-              src={response.postImageUrl || 'https://via.placeholder.com/400x160'}
+              src={response.imageUrl || 'https://via.placeholder.com/400x160'}
               alt="Resposta oficial"
               className="w-full h-36 object-cover rounded-md mb-3"
             />

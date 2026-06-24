@@ -1,6 +1,7 @@
 using apiUrbanPlanning.Infrastructure.Services;
 using apiUrbanPlanning.Requests;
 using apiUrbanPlanning.UseCase.Suggestions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace apiUrbanPlanning.Controllers.Suggestions
@@ -21,13 +22,20 @@ namespace apiUrbanPlanning.Controllers.Suggestions
         }
 
         [HttpPost("createSuggestion")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateSuggestion([FromForm]  RequestCreateSuggestion request)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> CreateSuggestion([FromForm] RequestCreateSuggestion request)
         {
-
             try
             {
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(new { message = "Token inválido ou usuário não identificado." });
+                }
+
                 string imageUrl = string.Empty;
 
                 if (request.File != null && request.File.Length > 0)
@@ -41,11 +49,11 @@ namespace apiUrbanPlanning.Controllers.Suggestions
                     Description = request.Description,
                     Latitude = request.Latitude,
                     Longitude = request.Longitude,
-                    UserId = request.UserId,
+                    UserId = userId,
                     IbgeId = request.IbgeId
                 }, imageUrl);
 
-                return StatusCode(201); 
+                return StatusCode(201);
             }
             catch (Exception ex)
             {

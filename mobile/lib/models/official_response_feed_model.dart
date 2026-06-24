@@ -3,13 +3,14 @@ class OfficialResponseFeedModel {
   final String title;
   final String description;
   final String userId;
-  final String postImageUrl;
+  final String imageUrl;
   final DateTime createdAt;
   final String userName;
   final String profilePictureUrl;
   final int numberSuggestion;
   final int? suggestionIbgeId;
   final String suggestionType;
+  final String statusAtPublish;
   final String suggestionStatus;
 
   OfficialResponseFeedModel({
@@ -17,13 +18,14 @@ class OfficialResponseFeedModel {
     required this.title,
     required this.description,
     required this.userId,
-    required this.postImageUrl,
+    required this.imageUrl,
     required this.createdAt,
     required this.userName,
     required this.profilePictureUrl,
     required this.numberSuggestion,
     this.suggestionIbgeId,
     required this.suggestionType,
+    required this.statusAtPublish,
     required this.suggestionStatus,
   });
 
@@ -33,13 +35,14 @@ class OfficialResponseFeedModel {
       title: json['title'],
       description: json['description'],
       userId: json['userId'],
-      postImageUrl: json['postImageUrl'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
       userName: json['userName'] ?? '',
       profilePictureUrl: json['profilePictureUrl'] ?? '',
       numberSuggestion: (json['numberSuggestion'] as num?)?.toInt() ?? 0,
       suggestionIbgeId: (json['suggestionIbgeId'] as num?)?.toInt(),
       suggestionType: json['suggestionType'] ?? '',
+      statusAtPublish: json['statusAtPublish'] ?? '',
       suggestionStatus: json['suggestionStatus'] ?? '',
     );
   }

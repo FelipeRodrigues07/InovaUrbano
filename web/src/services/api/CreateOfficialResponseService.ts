@@ -5,6 +5,7 @@ interface CreateOfficialResponsePayload {
   description: string;
   status: string;
   number: string;
+  ibgeId?: number;
   file?: File | null;
 }
 
@@ -15,6 +16,10 @@ export const createOfficialResponseService = async (data: CreateOfficialResponse
   formData.append('description', data.description);
   formData.append('status', data.status);
   formData.append('number', data.number);
+
+  if (data.ibgeId != null && data.ibgeId > 0) {
+    formData.append('ibgeId', String(data.ibgeId));
+  }
 
   if (data.file) {
     formData.append('File', data.file);
