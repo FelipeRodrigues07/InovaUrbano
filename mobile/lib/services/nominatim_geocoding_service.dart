@@ -6,7 +6,7 @@ class NominatimGeocodingService {
   final String userAgent;
 
   const NominatimGeocodingService({
-    this.userAgent = 'com.example.planejamento_urbano (Flutter)',
+    this.userAgent = 'br.com.inovaurbano.app (Flutter)',
   });
 
   Future<({double lat, double lon})?> geocodeCity({

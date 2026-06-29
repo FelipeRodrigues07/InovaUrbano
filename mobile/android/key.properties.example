@@ -1,0 +1,9 @@
+# Modelo do arquivo de assinatura de release.
+# 1) Gere o keystore (veja o comando no README/instruções).
+# 2) Copie este arquivo para "key.properties" (sem .example) e preencha com SEUS valores.
+# 3) NUNCA versione o key.properties nem o .jks (já estão no .gitignore).
+
+storePassword=SUA_SENHA_DO_KEYSTORE
+keyPassword=SUA_SENHA_DA_CHAVE
+keyAlias=upload
+storeFile=upload-keystore.jks

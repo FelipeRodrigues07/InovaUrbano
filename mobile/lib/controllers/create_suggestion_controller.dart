@@ -43,15 +43,11 @@ class CreateSuggestionController extends ChangeNotifier {
 
       // Envia a requisição
       final response = await request.send();
-      if (response.statusCode == 201) {
-        // print('Sugestão enviada com sucesso!');
-      } else {
+      if (response.statusCode != 201) {
         isError = true;
-        // print('Erro ao enviar sugestão: ${response.statusCode}');
       }
     } catch (error) {
       isError = true;
-      // print('Erro na requisição: $error');
     } finally {
       isLoading = false;
       notifyListeners();

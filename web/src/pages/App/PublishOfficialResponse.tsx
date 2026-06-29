@@ -19,6 +19,9 @@ const PublishOfficialResponse: React.FC = () => {
     if (location.state && location.state.suggestionNumber) {
       setNumero(location.state.suggestionNumber.toString());
     }
+    if (location.state && location.state.suggestionStatus) {
+      setSelectedStatus(location.state.suggestionStatus.toString());
+    }
   }, [location.state]);
 
   const statusOptions = [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planejamento_urbano/config/api_constants.dart';
 import 'package:planejamento_urbano/contexts/authProvider.dart';
 import 'package:planejamento_urbano/components/ProfileMenuWidget.dart';
+import 'package:planejamento_urbano/screens/app/info_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -260,7 +261,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ProfileMenuWidget(
                   title: "Configurações", icon: Icons.settings, onPress: () {}),
               ProfileMenuWidget(
-                  title: "Informações", icon: Icons.info, onPress: () {}),
+                  title: "Informações",
+                  icon: Icons.info,
+                  onPress: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const InfoScreen(),
+                      ),
+                    );
+                  }),
               ProfileMenuWidget(
                 title: "Sair",
                 icon: Icons.logout,
@@ -268,9 +277,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 endIcon: false,
                 onPress: () async {
                   await authProvider.signOut(); // Chama o método de logout
-                  // Redireciona para a tela de login
-                  // Navigator.pushNamedAndRemoveUntil(
-                  //     context, '/login', (route) => false);
+                  if (!mounted) return;
+                  // Redireciona para a tela de login e limpa a pilha de telas
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/login', (route) => false);
                 },
               ),
             ],

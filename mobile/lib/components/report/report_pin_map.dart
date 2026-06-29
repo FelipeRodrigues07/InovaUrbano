@@ -34,7 +34,7 @@ class ReportPinMap extends StatelessWidget {
               TileLayer(
                 urlTemplate:
                     'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                userAgentPackageName: 'com.example.planejamento_urbano',
+                userAgentPackageName: 'br.com.inovaurbano.app',
                 retinaMode: RetinaMode.isHighDensity(context),
               ),
               MarkerLayer(
