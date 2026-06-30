@@ -27,8 +27,8 @@ class CreateSuggestionController extends ChangeNotifier {
       // Adiciona os campos de texto
       request.fields['type'] = suggestion.type;
       request.fields['description'] = suggestion.description;
-      request.fields['latitude'] = suggestion.latitude.toString().replaceAll('.', ',');
-      request.fields['longitude'] = suggestion.longitude.toString().replaceAll('.', ',');
+      request.fields['latitude'] = suggestion.latitude.toString();
+      request.fields['longitude'] = suggestion.longitude.toString();      
       request.fields['ibgeId'] = suggestion.ibgeId.toString();
 
       // Adiciona o arquivo de imagem se ele existir

@@ -12,6 +12,6 @@ namespace apiUrbanPlanning.Requests
         public int IbgeId { get; set; }
 
         [FromForm(Name = "file")]
-        public IFormFile File { get; set; } //  Arquivo de imagem 
+        public IFormFile? File { get; set; }
     }
 }

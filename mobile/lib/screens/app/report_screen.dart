@@ -254,7 +254,7 @@ class _ReportScreenState extends State<ReportScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, preencha todos os campos.'),
+          content: Text('Preencha o tipo e a descrição (imagem é opcional).'),
         ),
       );
       return;
