@@ -41,6 +41,7 @@ builder.Services.AddScoped<GetAllSuggestionsByAreaUseCase>();
 builder.Services.AddScoped<GetAllSuggestionsFeedUseCase>();
 builder.Services.AddScoped<CreateProfilePictureUseCase>();
 builder.Services.AddScoped<DeleteProfilePictureUseCase>();
+builder.Services.AddScoped<DeleteAccountUseCase>();
 builder.Services.AddScoped<UpdatePasswordUseCase>();
 builder.Services.AddScoped<UpdateEmailUseCase>();
 builder.Services.AddScoped<UpdateNameUseCase>();

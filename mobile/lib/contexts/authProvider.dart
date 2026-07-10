@@ -73,6 +73,32 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Soft delete + anonimização no backend; limpa sessão local.
+  Future<void> deleteAccount() async {
+    final access = await ensureAccessToken();
+    if (access == null) {
+      throw Exception('Usuário não autenticado');
+    }
+
+    final response = await http.delete(
+      Uri.parse('$baseUrl/account'),
+      headers: {
+        'Authorization': 'Bearer $access',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Não foi possível excluir a conta.');
+    }
+
+    _token = null;
+    _userProfile = null;
+    await AuthSession.clearSession();
+    await StorageUser.storageUserDataRemove();
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
     await loadUserData();
   }

@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import DefaultLayout from '@/components/DefaultLayout';
 import SignIn from '@/pages/Auth/SignIn';
+import DeleteAccountPage from '@/pages/Public/DeleteAccountPage';
 
 import ProtectedRoute from '@/routes/ProtectedRoutes';
 import ViewSuggestions from '@/pages/App/ViewSuggestions';
@@ -20,7 +21,7 @@ export const AppRoutes: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<SignIn />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/excluir-conta" element={<DeleteAccountPage />} />
         <Route element={<ProtectedRoute/>}>
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -32,6 +33,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/official-responses/publish" element={<PublishOfficialResponse />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

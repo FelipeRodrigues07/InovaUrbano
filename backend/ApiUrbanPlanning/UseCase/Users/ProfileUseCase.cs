@@ -35,7 +35,7 @@ namespace apiUrbanPlanning.UseCase.Users
 
 
             var user = await _repository.GetUserById(userId);
-            if (user == null)
+            if (user == null || user.DeletedAt != null)
             {
                 throw new KeyNotFoundException("Usuário não encontrado.");
             }

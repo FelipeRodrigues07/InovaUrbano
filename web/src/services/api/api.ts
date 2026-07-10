@@ -22,7 +22,8 @@ function isPublicAuthRoute(url?: string): boolean {
   return (
     url.includes('/authenticate') ||
     url.includes('/refresh') ||
-    url.includes('/register')
+    url.includes('/register') ||
+    url.includes('/account/delete')
   );
 }
 

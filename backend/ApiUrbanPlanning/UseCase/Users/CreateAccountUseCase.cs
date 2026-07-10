@@ -19,9 +19,9 @@ namespace apiUrbanPlanning.UseCase.Users
 
         public async Task<RegisterUserResponse> Execute(RequestUser request)
         {
-            // Verifica se o e-mail já existe
+            // Verifica se o e-mail já existe em uma conta ativa
             var existingUser = await _repository.GetUserByEmail(request.Email);
-            if (existingUser != null)
+            if (existingUser != null && existingUser.DeletedAt == null)
             {
                 throw new Exception("Email already exists");
             }

@@ -96,6 +96,47 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _confirmDeleteAccount(AuthProvider authProvider) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir conta'),
+        content: const Text(
+          'Seus dados pessoais (nome, e-mail, foto e senha) serão removidos. '
+          'Relatos públicos permanecem no mapa de forma anônima.\n\n'
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await authProvider.deleteAccount();
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta excluída com sucesso.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível excluir a conta. Tente novamente.')),
+      );
+    }
+  }
+
   void _showOpcoesBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -270,6 +311,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     );
                   }),
+              ProfileMenuWidget(
+                title: "Excluir conta",
+                icon: Icons.delete_forever,
+                textColor: Colors.red,
+                endIcon: false,
+                onPress: () => _confirmDeleteAccount(authProvider),
+              ),
               ProfileMenuWidget(
                 title: "Sair",
                 icon: Icons.logout,

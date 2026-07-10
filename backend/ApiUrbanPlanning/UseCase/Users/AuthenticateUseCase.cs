@@ -26,7 +26,7 @@ namespace apiUrbanPlanning.UseCase.Users
         {
             var user = await _userRepository.GetUserByEmail(request.Email);
 
-            if (user == null)
+            if (user == null || user.DeletedAt != null)
             {
                 throw new InvalidOperationException("Email does not exist.");
             }
@@ -56,7 +56,7 @@ namespace apiUrbanPlanning.UseCase.Users
             }
 
             var user = await _userRepository.GetUserById(userId.Value);
-            if (user == null)
+            if (user == null || user.DeletedAt != null)
             {
                 throw new UnauthorizedAccessException("User not found.");
             }
