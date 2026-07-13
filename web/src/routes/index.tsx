@@ -5,6 +5,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import DefaultLayout from '@/components/DefaultLayout';
 import SignIn from '@/pages/Auth/SignIn';
 import DeleteAccountPage from '@/pages/Public/DeleteAccountPage';
+import PrivacyPolicyPage from '@/pages/Public/PrivacyPolicyPage';
 
 import ProtectedRoute from '@/routes/ProtectedRoutes';
 import ViewSuggestions from '@/pages/App/ViewSuggestions';
@@ -22,6 +23,7 @@ export const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/login" element={<SignIn />} />
         <Route path="/excluir-conta" element={<DeleteAccountPage />} />
+        <Route path="/privacidade" element={<PrivacyPolicyPage />} />
         <Route element={<ProtectedRoute/>}>
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
