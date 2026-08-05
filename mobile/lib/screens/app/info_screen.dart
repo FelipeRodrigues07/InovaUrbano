@@ -84,6 +84,37 @@ class InfoScreen extends StatelessWidget {
                 icon: Icons.verified_outlined,
                 text: 'Veja o status de cada solicitação atualizado pela gestão.',
               ),
+              const SizedBox(height: 28),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade700, width: 1),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 20, color: Colors.amber.shade800),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Aviso: o Inova Urbano é um aplicativo independente e não '
+                        'representa nenhuma prefeitura, governo ou órgão público, '
+                        'nem possui vínculo oficial com essas entidades. O conteúdo '
+                        'é gerado pelos próprios usuários e não constitui informação '
+                        'oficial do governo.',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: Colors.grey[850],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 32),
               Center(
                 child: Text(

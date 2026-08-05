@@ -464,7 +464,11 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
             ),
 
             // Aba de respostas oficiais (vinculadas às solicitações da cidade)
-            Consumer<OfficialResponsesFeedController>(
+            Column(
+              children: [
+                _officialResponsesDisclaimer(),
+                Expanded(
+                  child: Consumer<OfficialResponsesFeedController>(
               builder: (context, controller, child) {
                 final cityLabel =
                     controller.cityLabel ?? _headerCityLabel;
@@ -635,9 +639,40 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                         },
                       );
               },
+                ),
+                ),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _officialResponsesDisclaimer() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber.shade700),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, size: 18, color: Colors.amber.shade800),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'App independente, sem vínculo com prefeituras ou órgãos públicos. '
+              'O conteúdo é enviado por usuários e não representa informação oficial do governo.',
+              style: TextStyle(
+                  fontSize: 12, height: 1.4, color: Colors.grey[850]),
+            ),
+          ),
+        ],
       ),
     );
   }
