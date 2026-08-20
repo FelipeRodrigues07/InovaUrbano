@@ -56,9 +56,9 @@ class InfoScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'O Inova Urbano é um aplicativo de planejamento urbano participativo. '
+                'O Inova Urbano é um aplicativo independente de participação cidadã. '
                 'Por aqui, cidadãos podem enviar sugestões e solicitações sobre a cidade, '
-                'acompanhar as respostas oficiais da prefeitura e visualizar no mapa as '
+                'acompanhar os retornos sobre as solicitações e visualizar no mapa as '
                 'demandas da sua região.',
                 style: TextStyle(
                   fontSize: 14,
@@ -78,11 +78,11 @@ class InfoScreen extends StatelessWidget {
               ),
               _InfoItem(
                 icon: Icons.feed_outlined,
-                text: 'Acompanhe o feed de solicitações e respostas oficiais.',
+                text: 'Acompanhe o feed de solicitações e respostas.',
               ),
               _InfoItem(
                 icon: Icons.verified_outlined,
-                text: 'Veja o status de cada solicitação atualizado pela gestão.',
+                text: 'Acompanhe o status de cada solicitação conforme o andamento.',
               ),
               const SizedBox(height: 28),
               Container(

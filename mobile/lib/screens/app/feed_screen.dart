@@ -54,7 +54,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
           'Selecione uma cidade na tela Início para ver as solicitações do município.';
       icon = Icons.info_outline;
     } else if (cityLabel != null) {
-      message = 'Solicitações e respostas oficiais de: $cityLabel';
+      message = 'Solicitações e respostas de: $cityLabel';
       icon = Icons.location_on_outlined;
     } else {
       message = 'Carregando informações da cidade...';
@@ -273,7 +273,7 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                       unselectedLabelStyle: const TextStyle(fontSize: 13),
                       tabs: const <Widget>[
                         Tab(text: 'Todas as solicitações'),
-                        Tab(text: 'Respostas oficiais'),
+                        Tab(text: 'Respostas'),
                       ],
                       indicatorColor: Colors.white,
                       labelColor: Colors.white,
@@ -478,9 +478,9 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                 if (controller.isLoading && controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.hourglass_empty,
-                    title: 'Carregando respostas oficiais...',
+                    title: 'Carregando respostas...',
                     subtitle: cityLabel != null
-                        ? 'Respostas da prefeitura em $cityLabel'
+                        ? 'Respostas em $cityLabel'
                         : null,
                   );
                 }
@@ -490,14 +490,14 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                     icon: Icons.location_city_outlined,
                     title: 'Nenhuma cidade selecionada',
                     subtitle:
-                        'Selecione o município na tela Início para ver as respostas oficiais ligadas às solicitações locais.',
+                        'Selecione o município na tela Início para ver as respostas ligadas às solicitações locais.',
                   );
                 }
 
                 if (controller.isError && controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.cloud_off_outlined,
-                    title: 'Não foi possível carregar as respostas oficiais',
+                    title: 'Não foi possível carregar as respostas',
                     subtitle:
                         'Confira se a API está rodando e o IP em api_constants.dart.',
                     action: _blueActionButton(
@@ -510,10 +510,10 @@ class FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                 if (controller.officialResponses.isEmpty) {
                   return _centerFeedMessage(
                     icon: Icons.campaign_outlined,
-                    title: 'Não há respostas oficiais para esta cidade',
+                    title: 'Não há respostas para esta cidade',
                     subtitle: cityLabel != null
-                        ? 'Ainda não há respostas oficiais vinculadas a solicitações de $cityLabel.'
-                        : 'As respostas oficiais aparecem quando a administração responde a uma solicitação.',
+                        ? 'Ainda não há respostas vinculadas a solicitações de $cityLabel.'
+                        : 'As respostas aparecem quando há um retorno sobre uma solicitação.',
                     action: _blueActionButton(
                       label: 'Atualizar',
                       onPressed: () => controller.loadOfficialResponses(),
